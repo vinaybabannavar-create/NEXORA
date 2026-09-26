@@ -1,0 +1,57 @@
+# Environment
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+.next/
+dist/
+build/
+npm-debug.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# Django
+*.sqlite3
+media/
+staticfiles/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Docker
+docker-compose.override.yml
+
+# Secrets
+*.pem
+*.key
+
+# AI / ML
+*.bin
+*.pt
+*.pth
+*.onnx
+
+# Temporary
+tmp/
+temp/
