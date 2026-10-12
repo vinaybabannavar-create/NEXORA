@@ -3,55 +3,40 @@
 .env.*
 !.env.example
 
-# Node
-node_modules/
-.next/
-dist/
-build/
-npm-debug.log*
-
 # Python
+.venv/
 __pycache__/
 *.py[cod]
-*.pyo
-.venv/
-venv/
-env/
-
-# Django
 *.sqlite3
-media/
-staticfiles/
-
-# Testing
 .pytest_cache/
+.mypy_cache/
 .coverage
 htmlcov/
 
-# IDE
-.vscode/
-.idea/
+# Node
+node_modules/
+.next/
+out/
+dist/
+coverage/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
 
-# OS
+# IDE / OS
+.vscode/*
+!.vscode/extensions.json
+!.vscode/tasks.json
+!.vscode/launch.json
+.idea/
+*.iml
 .DS_Store
 Thumbs.db
 
-# Logs
-*.log
-
-# Docker
-docker-compose.override.yml
-
-# Secrets
+# Secrets / runtime
 *.pem
 *.key
-
-# AI / ML
-*.bin
-*.pt
-*.pth
-*.onnx
-
-# Temporary
-tmp/
-temp/
+*.crt
+logs/
+uploads/
+media/
