@@ -1,7 +1,9 @@
+
 from __future__ import annotations
 
 from typing import Any
 
+from app.services.llm_service import LLMService
 from app.services.semantic_search_service import (
     SemanticSearchService,
 )
@@ -9,23 +11,19 @@ from app.services.semantic_search_service import (
 
 class RAGService:
     """
-    Retrieval-Augmented Generation foundation.
-
-    Currently responsible for:
-    1. Retrieving relevant document chunks.
-    2. Building a clean context block.
-    3. Preparing source metadata.
-
-    LLM generation will be added in the next stage.
+    Retrieves relevant document chunks, builds context,
+    and generates grounded answers using Gemini.
     """
 
     def __init__(
         self,
         semantic_search: SemanticSearchService | None = None,
+        llm_service: LLMService | None = None,
     ) -> None:
         self.semantic_search = (
             semantic_search or SemanticSearchService()
         )
+        self.llm_service = llm_service or LLMService()
 
     def retrieve_context(
         self,
@@ -33,6 +31,10 @@ class RAGService:
         limit: int = 5,
         document_id: str | None = None,
     ) -> dict[str, Any]:
+        query = query.strip()
+
+        if not query:
+            raise ValueError("Search query cannot be empty.")
 
         search_result = self.semantic_search.search(
             query=query,
@@ -65,12 +67,33 @@ class RAGService:
 
         context = "\n\n".join(context_parts)
 
+        # Do not ask Gemini to answer without retrieved evidence.
+        if not context.strip():
+            return {
+                "success": True,
+                "query": query,
+                "context": "",
+                "context_count": 0,
+                "sources": [],
+                "answer": (
+                    "I couldn't find relevant information "
+                    "in the indexed documents."
+                ),
+            }
+
+        # Generate an answer grounded in the retrieved context.
+        answer = self.llm_service.generate_answer(
+            query=query,
+            context=context,
+        )
+
         return {
             "success": True,
             "query": query,
             "context": context,
             "context_count": len(context_parts),
             "sources": sources,
+            "answer": answer,
         }
 
 
