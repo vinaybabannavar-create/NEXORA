@@ -43,21 +43,41 @@ ALLOWED_HOSTS = [
 # APPLICATIONS
 # ============================================================
 
+
+
 INSTALLED_APPS = [
+    "unfold",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
     "rest_framework",
     "corsheaders",
     "rest_framework_simplejwt.token_blacklist",
-
     "nexora_accounts",
     "nexora_api",
 ]
+
+
+# ============================================================
+# NEXORA ADMIN THEME
+# ============================================================
+
+
+UNFOLD = {
+    "SITE_TITLE": "NEXORA Administration",
+    "SITE_HEADER": "NEXORA",
+    "SITE_SUBHEADER": "Enterprise Operations & Intelligence",
+    "SITE_SYMBOL": "dashboard",
+    "SHOW_HISTORY": True,
+    "SHOW_VIEW_ON_SITE": True,
+
+    "STYLES": [
+        lambda request: "/static/admin/css/nexora-admin.css",
+    ],
+}
 
 
 # ============================================================
@@ -93,7 +113,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -196,6 +216,9 @@ USE_TZ = True
 # ============================================================
 
 STATIC_URL = "static/"
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

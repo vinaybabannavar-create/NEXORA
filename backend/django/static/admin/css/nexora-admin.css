@@ -1,0 +1,340 @@
+
+/* NEXORA — Premium Django Admin Styling */
+
+:root {
+  --nx-bg: #080d1b;
+  --nx-panel: #10182b;
+  --nx-panel-hover: #17223a;
+  --nx-border: #26344f;
+  --nx-text: #edf2ff;
+  --nx-muted: #91a0bf;
+  --nx-purple: #8b5cf6;
+  --nx-radius: 12px;
+}
+
+/* Consistent typography */
+body,
+button,
+input,
+select,
+textarea {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* Content area */
+#content,
+#content-main {
+  min-width: 0;
+}
+
+#content {
+  padding: 28px clamp(16px, 3vw, 42px);
+}
+
+#content h1 {
+  font-size: clamp(24px, 2.5vw, 32px);
+  font-weight: 750;
+  letter-spacing: -0.7px;
+  margin-bottom: 24px;
+}
+
+/* Form sections */
+fieldset,
+.module,
+.inline-group,
+.submit-row {
+  border-radius: var(--nx-radius);
+  overflow: hidden;
+}
+
+fieldset {
+  margin-bottom: 22px;
+}
+
+fieldset h2,
+.module h2,
+.inline-group h2 {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.15px;
+}
+
+/* Field labels */
+.form-row label,
+.aligned label,
+label {
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.help,
+.helptext,
+p.help {
+  color: var(--nx-muted);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+/* Inputs, selects and textareas */
+input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="hidden"]),
+select,
+textarea {
+  width: 100%;
+  max-width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid var(--nx-border);
+  border-radius: 9px;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--nx-purple);
+  box-shadow: 0 0 0 3px rgb(139 92 246 / 16%);
+}
+
+/* Improve form row spacing */
+.form-row,
+.aligned .form-row {
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+
+.form-row > div,
+.form-row .flex-container {
+  min-width: 0;
+}
+
+/* Checkboxes and radio controls keep their natural size */
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--nx-purple);
+}
+
+/* Buttons */
+.submit-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 18px;
+  margin-top: 20px;
+}
+
+.submit-row input,
+.button,
+input[type="submit"],
+input[type="button"],
+button {
+  border-radius: 9px;
+  font-weight: 650;
+  transition: filter 0.2s, transform 0.2s;
+}
+
+.submit-row input:hover,
+.button:hover,
+input[type="submit"]:hover,
+button:hover {
+  filter: brightness(1.1);
+}
+
+/* Tables and changelist pages */
+#changelist,
+#changelist-filter,
+#changelist-form,
+.results {
+  min-width: 0;
+  border-radius: var(--nx-radius);
+}
+
+#changelist table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+#changelist table th,
+#changelist table td {
+  padding: 13px 15px;
+  vertical-align: middle;
+}
+
+#changelist table tbody tr:hover {
+  background: rgb(139 92 246 / 5%);
+}
+
+/* Breadcrumbs */
+div.breadcrumbs {
+  padding: 14px 24px;
+  line-height: 1.6;
+}
+
+/* Related-object links */
+.related-widget-wrapper {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.related-widget-wrapper select {
+  max-width: 100%;
+}
+
+/* Error messages */
+.errorlist {
+  padding: 12px 16px;
+  border-radius: 9px;
+  line-height: 1.7;
+}
+
+/* Responsive layouts */
+@media (min-width: 1200px) {
+  #content {
+    max-width: 1800px;
+    margin-inline: auto;
+  }
+}
+
+@media (max-width: 767px) {
+  #content {
+    padding: 18px 12px;
+  }
+
+  .form-row,
+  .aligned .form-row {
+    padding: 12px;
+  }
+
+  .submit-row {
+    gap: 8px;
+    padding: 12px;
+  }
+
+  #changelist {
+    overflow-x: auto;
+  }
+
+  #changelist table {
+    min-width: 650px;
+  }
+}
+
+/* Fix Unfold form and permission selector layout */
+.aligned .form-row {
+  display: block;
+  padding: 14px 18px;
+}
+
+.aligned .form-row label {
+  display: inline-block;
+  padding-top: 0;
+  margin-bottom: 8px;
+}
+
+.aligned .form-row > div,
+.aligned .form-row .flex-container {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.aligned .form-row input:not([type="checkbox"]):not([type="radio"]),
+.aligned .form-row select,
+.aligned .form-row textarea {
+  width: 100%;
+  max-width: 100%;
+}
+
+.selector {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.selector-available,
+.selector-chosen {
+  flex: 1 1 0;
+  width: auto;
+  min-width: 0;
+}
+
+.selector select {
+  width: 100%;
+  min-width: 0;
+  min-height: 180px;
+}
+
+.selector .selector-chooser {
+  flex: 0 0 30px;
+  width: 30px;
+  margin: 0;
+  align-self: center;
+}
+
+@media (max-width: 767px) {
+  .selector {
+    flex-wrap: wrap;
+  }
+
+  .selector-available,
+  .selector-chosen {
+    flex: 1 1 100%;
+  }
+
+  .selector .selector-chooser {
+    flex-basis: 100%;
+  }
+}
+
+
+/* NEXORA — Dark theme for native and enhanced select controls */
+
+select,
+select option,
+select optgroup {
+  background-color: #111a2d;
+  color: #edf2ff;
+}
+
+select {
+  border: 1px solid #34415e;
+  border-radius: 9px;
+  color-scheme: dark;
+}
+
+select:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgb(139 92 246 / 18%);
+}
+
+select option {
+  padding: 10px;
+}
+
+/* Keep dropdown controls from stretching across the screen */
+.form-row select {
+  max-width: 100%;
+}
+
+/* Improve readability of token labels and related controls */
+.aligned .form-row label {
+  color: #dbe5fa;
+}
+
+/* Responsive layout for small screens */
+@media (max-width: 767px) {
+  select {
+    width: 100%;
+    max-width: 100%;
+  }
+}

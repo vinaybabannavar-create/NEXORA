@@ -40,3 +40,14 @@ Thumbs.db
 logs/
 uploads/
 media/
+
+# Local backups and temporary patch files
+backups/
+*.bak
+nexora-before-layout.patch
+
+# Generated frontend build-check output
+frontend/.next-build-check/
+
+# Local uploaded documents and test files
+backend/django/documents/

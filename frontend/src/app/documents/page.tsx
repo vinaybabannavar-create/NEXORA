@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
+import WorkspaceLayout from "@/components/WorkspaceLayout";
 
 type DocumentItem = {
   id: number;
@@ -128,6 +129,80 @@ export default function DocumentsPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const [form, setForm] = useState(emptyForm);
+  const [aiQuestion, setAiQuestion] = useState("");
+  const [aiAnswer, setAiAnswer] = useState("");
+  const [aiSources, setAiSources] = useState<string[]>([]);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState("");
+
+  async function askNexoraAI(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const question = aiQuestion.trim();
+    if (!question || aiLoading) return;
+
+    setAiLoading(true);
+    setAiError("");
+    setAiAnswer("");
+    setAiSources([]);
+
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_AI_URL || "http://127.0.0.1:8001";
+
+      const response = await fetch(`${baseUrl}/api/v1/ai/rag/context`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: question,
+          limit: 5,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          typeof data.detail === "string"
+            ? data.detail
+            : "The AI service could not answer your question.",
+        );
+      }
+
+      const answer =
+        data.answer ??
+        data.generated_answer ??
+        data.response ??
+        data.context ??
+        "";
+
+      if (typeof answer === "string" && answer.trim()) {
+        setAiAnswer(answer);
+      } else {
+        setAiError(
+          "The AI service returned no answer. Please check the response format.",
+        );
+      }
+
+      const rawSources = data.sources ?? data.results ?? [];
+      setAiSources(
+        Array.isArray(rawSources)
+          ? rawSources.map((source: unknown) =>
+              typeof source === "string" ? source : JSON.stringify(source),
+            )
+          : [],
+      );
+    } catch (error) {
+      setAiError(
+        error instanceof Error
+          ? error.message
+          : "Unable to connect to the NEXORA AI service.",
+      );
+    } finally {
+      setAiLoading(false);
+    }
+  }
 
   async function loadData() {
     try {
@@ -366,520 +441,636 @@ export default function DocumentsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto max-w-7xl space-y-8 p-6 lg:p-8">
-        {/* Header */}
-        <section className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-400">
-              NEXORA
-            </p>
-
-            <h1 className="mt-2 text-3xl font-bold tracking-tight">
-              Document Management
-            </h1>
-
-            <p className="mt-2 text-sm text-slate-400">
-              Manage enterprise documents, contracts, reports, policies and
-              technical files.
-            </p>
-          </div>
-
-          <button
-            onClick={openCreateModal}
-            className="rounded-xl bg-cyan-500 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-400"
-          >
-            + Upload Document
-          </button>
-        </section>
-
-        {/* Stats */}
-        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          <StatCard label="Total Documents" value={stats.total} />
-
-          <StatCard label="Active" value={stats.active} />
-
-          <StatCard label="Public" value={stats.public} />
-
-          <StatCard label="Linked Projects" value={stats.projects} />
-
-          <StatCard
-            label="Storage Used"
-            value={formatFileSize(stats.totalSize)}
-          />
-        </section>
-
-        {/* Filters */}
-        <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            <input
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search documents..."
-              className="input"
-            />
-
-            <select
-              value={typeFilter}
-              onChange={(event) => setTypeFilter(event.target.value)}
-              className="input"
-            >
-              <option value="">All document types</option>
-
-              {DOCUMENT_TYPES.map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-
-            <select
-              value={categoryFilter}
-              onChange={(event) => setCategoryFilter(event.target.value)}
-              className="input"
-            >
-              <option value="">All categories</option>
-
-              {CATEGORIES.map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </section>
-
-        {/* Documents */}
-        <section className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
-          <div className="border-b border-slate-800 px-5 py-4">
-            <div className="flex items-center justify-between">
+    <WorkspaceLayout>
+      <div className="min-w-0 space-y-6 pb-10">
+        <main className="min-h-screen bg-slate-950 text-white">
+          <div className="mx-auto max-w-7xl space-y-8 p-6 lg:p-8">
+            {/* Header */}
+            <section className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <h2 className="font-semibold">Document Directory</h2>
-                <p className="mt-1 text-xs text-slate-500">
-                  Showing {filteredDocuments.length} of {documents.length}{" "}
-                  documents
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-400">
+                  NEXORA
+                </p>
+
+                <h1 className="mt-2 text-3xl font-bold tracking-tight">
+                  Document Management
+                </h1>
+
+                <p className="mt-2 text-sm text-slate-400">
+                  Manage enterprise documents, contracts, reports, policies and
+                  technical files.
                 </p>
               </div>
-            </div>
-          </div>
-
-          {loading ? (
-            <div className="p-10 text-center text-slate-400">
-              Loading documents...
-            </div>
-          ) : filteredDocuments.length === 0 ? (
-            <div className="p-12 text-center">
-              <div className="text-4xl">📄</div>
-
-              <h3 className="mt-4 text-lg font-semibold">No documents found</h3>
-
-              <p className="mt-2 text-sm text-slate-500">
-                Upload your first document to get started.
-              </p>
 
               <button
                 onClick={openCreateModal}
-                className="mt-5 rounded-xl bg-cyan-500 px-5 py-3 font-semibold text-slate-950 hover:bg-cyan-400"
+                className="rounded-xl bg-cyan-500 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-400"
               >
-                Upload Document
+                + Upload Document
               </button>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[1100px]">
-                <thead className="border-b border-slate-800 bg-slate-950/50">
-                  <tr className="text-left text-xs uppercase tracking-wider text-slate-500">
-                    <th className="px-5 py-4">Document</th>
-                    <th className="px-5 py-4">Type</th>
-                    <th className="px-5 py-4">Category</th>
-                    <th className="px-5 py-4">Project</th>
-                    <th className="px-5 py-4">Customer</th>
-                    <th className="px-5 py-4">Version</th>
-                    <th className="px-5 py-4">Size</th>
-                    <th className="px-5 py-4">Created</th>
-                    <th className="px-5 py-4">Actions</th>
-                  </tr>
-                </thead>
+            </section>
 
-                <tbody>
-                  {filteredDocuments.map((document) => (
-                    <tr
-                      key={document.id}
-                      className="border-b border-slate-800/70 transition hover:bg-slate-800/30"
-                    >
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500/10 text-lg">
-                            📄
-                          </div>
-
-                          <div>
-                            <p className="font-medium text-white">
-                              {document.title}
-                            </p>
-
-                            <p className="text-xs text-slate-500">
-                              {document.document_code}
-                            </p>
-
-                            <div className="mt-1 flex gap-2">
-                              {document.is_active && (
-                                <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-400">
-                                  Active
-                                </span>
-                              )}
-
-                              {document.is_public && (
-                                <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-medium text-blue-400">
-                                  Public
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-
-                      <td className="px-5 py-4">
-                        <span className="rounded-lg bg-slate-800 px-2.5 py-1 text-xs text-slate-300">
-                          {document.document_type_display}
-                        </span>
-                      </td>
-
-                      <td className="px-5 py-4 text-sm text-slate-300">
-                        {document.category_display}
-                      </td>
-
-                      <td className="px-5 py-4">
-                        {document.project_name ? (
-                          <div>
-                            <p className="text-sm text-white">
-                              {document.project_name}
-                            </p>
-
-                            <p className="text-xs text-slate-500">
-                              {document.project
-                                ? `Project #${document.project}`
-                                : ""}
-                            </p>
-                          </div>
-                        ) : (
-                          <span className="text-sm text-slate-500">—</span>
-                        )}
-                      </td>
-
-                      <td className="px-5 py-4 text-sm text-slate-300">
-                        {document.customer_name || "—"}
-                      </td>
-
-                      <td className="px-5 py-4 text-sm text-slate-300">
-                        v{document.version}
-                      </td>
-
-                      <td className="px-5 py-4 text-sm text-slate-400">
-                        {formatFileSize(document.file_size)}
-                      </td>
-
-                      <td className="px-5 py-4 text-sm text-slate-400">
-                        {formatDate(document.created_at)}
-                      </td>
-
-                      <td className="px-5 py-4">
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => openDocument(document)}
-                            className="rounded-lg border border-slate-700 px-3 py-2 text-xs font-medium text-slate-300 hover:border-cyan-500 hover:text-cyan-400"
-                          >
-                            View
-                          </button>
-
-                          <button
-                            onClick={() => openEditModal(document)}
-                            className="rounded-lg border border-slate-700 px-3 py-2 text-xs font-medium text-slate-300 hover:border-cyan-500 hover:text-cyan-400"
-                          >
-                            Edit
-                          </button>
-
-                          <button
-                            onClick={() => handleDelete(document)}
-                            className="rounded-lg border border-red-900/50 px-3 py-2 text-xs font-medium text-red-400 hover:bg-red-500/10"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
-      </div>
-
-      {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-          <div className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl">
-            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-800 bg-slate-900 px-6 py-5">
-              <div>
-                <h2 className="text-xl font-bold">
-                  {editingDocument ? "Edit Document" : "Upload Document"}
-                </h2>
-
-                <p className="mt-1 text-xs text-slate-500">
-                  {editingDocument
-                    ? "Update document metadata or replace the file."
-                    : "Add a document to the NEXORA knowledge base."}
-                </p>
-              </div>
-
-              <button
-                onClick={closeModal}
-                className="rounded-lg px-3 py-2 text-slate-400 hover:bg-slate-800 hover:text-white"
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-6 p-6">
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            {/* Ask NEXORA AI */}
+            <section className="overflow-hidden rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-slate-900 via-slate-900 to-cyan-950/40 p-5 shadow-xl sm:p-7">
+              <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">
-                    Document Code *
-                  </label>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-400">
+                    NEXORA Intelligence
+                  </p>
 
-                  <input
-                    value={form.document_code}
-                    onChange={(event) =>
-                      updateForm("document_code", event.target.value)
-                    }
-                    placeholder="DOC-001"
-                    className="input"
-                  />
+                  <h2 className="mt-2 text-2xl font-bold text-white">
+                    Ask NEXORA AI
+                  </h2>
+
+                  <p className="mt-2 text-sm text-slate-400">
+                    Ask questions about information in your indexed documents.
+                  </p>
                 </div>
 
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">
-                    Version
-                  </label>
-
-                  <input
-                    type="number"
-                    min="1"
-                    value={form.version}
-                    onChange={(event) =>
-                      updateForm("version", event.target.value)
-                    }
-                    className="input"
-                  />
-                </div>
+                <span className="rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-3 py-2 text-xs font-medium text-cyan-300">
+                  AI Document Assistant
+                </span>
               </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-300">
-                  Title *
-                </label>
-
-                <input
-                  value={form.title}
-                  onChange={(event) => updateForm("title", event.target.value)}
-                  placeholder="Enterprise Security Policy"
-                  className="input"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-300">
-                  Description
+              <form onSubmit={askNexoraAI} className="space-y-3">
+                <label
+                  htmlFor="nexora-ai-question"
+                  className="block text-sm font-medium text-slate-300"
+                >
+                  Your question
                 </label>
 
                 <textarea
-                  value={form.description}
-                  onChange={(event) =>
-                    updateForm("description", event.target.value)
-                  }
-                  placeholder="Describe this document..."
-                  rows={4}
-                  className="input resize-none"
+                  id="nexora-ai-question"
+                  value={aiQuestion}
+                  onChange={(event) => setAiQuestion(event.target.value)}
+                  placeholder="Example: What are the key points in our project documents?"
+                  rows={3}
+                  maxLength={2000}
+                  required
+                  className="w-full resize-y rounded-xl border border-slate-700 bg-slate-950/70 p-4 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20"
                 />
-              </div>
 
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">
-                    Document Type
-                  </label>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-xs text-slate-500">
+                    Answers depend on documents indexed in the AI knowledge
+                    base.
+                  </p>
 
-                  <select
-                    value={form.document_type}
-                    onChange={(event) =>
-                      updateForm("document_type", event.target.value)
-                    }
-                    className="input"
+                  <button
+                    type="submit"
+                    disabled={aiLoading || !aiQuestion.trim()}
+                    className="rounded-xl bg-cyan-500 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {DOCUMENT_TYPES.map(([value, label]) => (
-                      <option key={value} value={value}>
-                        {label}
-                      </option>
-                    ))}
-                  </select>
+                    {aiLoading ? "Thinking..." : "Ask NEXORA AI →"}
+                  </button>
                 </div>
+              </form>
 
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">
-                    Category
-                  </label>
-
-                  <select
-                    value={form.category}
-                    onChange={(event) =>
-                      updateForm("category", event.target.value)
-                    }
-                    className="input"
-                  >
-                    {CATEGORIES.map(([value, label]) => (
-                      <option key={value} value={value}>
-                        {label}
-                      </option>
-                    ))}
-                  </select>
+              {aiLoading && (
+                <div
+                  role="status"
+                  className="mt-5 flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-950/50 p-4 text-sm text-cyan-300"
+                >
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-cyan-400 border-t-transparent" />
+                  Searching indexed documents and preparing an answer...
                 </div>
-              </div>
+              )}
 
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">
-                    Project
-                  </label>
-
-                  <select
-                    value={form.project}
-                    onChange={(event) =>
-                      updateForm("project", event.target.value)
-                    }
-                    className="input"
-                  >
-                    <option value="">No project</option>
-
-                    {projects.map((project) => (
-                      <option key={project.id} value={project.id}>
-                        {project.project_code} — {project.name}
-                      </option>
-                    ))}
-                  </select>
+              {aiError && (
+                <div
+                  role="alert"
+                  className="mt-5 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300"
+                >
+                  {aiError}
                 </div>
+              )}
 
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">
-                    Customer
-                  </label>
+              {aiAnswer && (
+                <div className="mt-5 rounded-xl border border-cyan-500/20 bg-slate-950/60 p-5">
+                  <h3 className="mb-3 font-semibold text-cyan-300">
+                    AI Answer
+                  </h3>
 
-                  <select
-                    value={form.customer}
-                    onChange={(event) =>
-                      updateForm("customer", event.target.value)
-                    }
-                    className="input"
-                  >
-                    <option value="">No customer</option>
+                  <p className="whitespace-pre-wrap break-words text-sm leading-7 text-slate-200">
+                    {aiAnswer}
+                  </p>
 
-                    {customers.map((customer) => (
-                      <option key={customer.id} value={customer.id}>
-                        {customer.company_name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+                  {aiSources.length > 0 && (
+                    <div className="mt-5 border-t border-slate-800 pt-4">
+                      <h4 className="mb-2 text-sm font-semibold text-white">
+                        Retrieved Sources
+                      </h4>
 
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-300">
-                  Document File {!editingDocument && "*"}
-                </label>
-
-                <div className="rounded-xl border border-dashed border-slate-700 bg-slate-950/50 p-5">
-                  <input
-                    type="file"
-                    onChange={(event) =>
-                      setSelectedFile(event.target.files?.[0] || null)
-                    }
-                    className="block w-full text-sm text-slate-400 file:mr-4 file:rounded-lg file:border-0 file:bg-cyan-500 file:px-4 file:py-2 file:font-semibold file:text-slate-950 hover:file:bg-cyan-400"
-                  />
-
-                  {selectedFile && (
-                    <p className="mt-3 text-sm text-cyan-400">
-                      Selected: {selectedFile.name} (
-                      {formatFileSize(selectedFile.size)})
-                    </p>
-                  )}
-
-                  {editingDocument && !selectedFile && (
-                    <p className="mt-3 text-xs text-slate-500">
-                      Leave empty to keep the existing file.
-                    </p>
+                      <ul className="space-y-2">
+                        {aiSources.map((source, index) => (
+                          <li
+                            key={`${index}-${source}`}
+                            className="break-words rounded-lg bg-slate-900 p-3 text-xs leading-5 text-slate-400"
+                          >
+                            {source}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   )}
                 </div>
-              </div>
+              )}
+            </section>
 
-              <div className="flex flex-wrap gap-6">
-                <label className="flex cursor-pointer items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={form.is_public}
-                    onChange={(event) =>
-                      updateForm("is_public", event.target.checked)
-                    }
-                    className="h-4 w-4 rounded border-slate-700 bg-slate-950"
-                  />
+            {/* Stats */}
+            <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+              <StatCard label="Total Documents" value={stats.total} />
 
-                  <span className="text-sm text-slate-300">
-                    Public document
-                  </span>
-                </label>
+              <StatCard label="Active" value={stats.active} />
 
-                <label className="flex cursor-pointer items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={form.is_active}
-                    onChange={(event) =>
-                      updateForm("is_active", event.target.checked)
-                    }
-                    className="h-4 w-4 rounded border-slate-700 bg-slate-950"
-                  />
+              <StatCard label="Public" value={stats.public} />
 
-                  <span className="text-sm text-slate-300">
-                    Active document
-                  </span>
-                </label>
-              </div>
+              <StatCard label="Linked Projects" value={stats.projects} />
 
-              <div className="flex justify-end gap-3 border-t border-slate-800 pt-5">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  disabled={saving}
-                  className="rounded-xl border border-slate-700 px-5 py-3 font-medium text-slate-300 hover:bg-slate-800 disabled:opacity-50"
+              <StatCard
+                label="Storage Used"
+                value={formatFileSize(stats.totalSize)}
+              />
+            </section>
+
+            {/* Filters */}
+            <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                <input
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Search documents..."
+                  className="input"
+                />
+
+                <select
+                  value={typeFilter}
+                  onChange={(event) => setTypeFilter(event.target.value)}
+                  className="input"
                 >
-                  Cancel
-                </button>
+                  <option value="">All document types</option>
 
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="rounded-xl bg-cyan-500 px-6 py-3 font-semibold text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+                  {DOCUMENT_TYPES.map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  value={categoryFilter}
+                  onChange={(event) => setCategoryFilter(event.target.value)}
+                  className="input"
                 >
-                  {saving
-                    ? "Saving..."
-                    : editingDocument
-                      ? "Update Document"
-                      : "Upload Document"}
-                </button>
+                  <option value="">All categories</option>
+
+                  {CATEGORIES.map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
               </div>
-            </form>
+            </section>
+
+            {/* Documents */}
+            <section className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
+              <div className="border-b border-slate-800 px-5 py-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="font-semibold">Document Directory</h2>
+                    <p className="mt-1 text-xs text-slate-500">
+                      Showing {filteredDocuments.length} of {documents.length}{" "}
+                      documents
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {loading ? (
+                <div className="p-10 text-center text-slate-400">
+                  Loading documents...
+                </div>
+              ) : filteredDocuments.length === 0 ? (
+                <div className="p-12 text-center">
+                  <div className="text-4xl">📄</div>
+
+                  <h3 className="mt-4 text-lg font-semibold">
+                    No documents found
+                  </h3>
+
+                  <p className="mt-2 text-sm text-slate-500">
+                    Upload your first document to get started.
+                  </p>
+
+                  <button
+                    onClick={openCreateModal}
+                    className="mt-5 rounded-xl bg-cyan-500 px-5 py-3 font-semibold text-slate-950 hover:bg-cyan-400"
+                  >
+                    Upload Document
+                  </button>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[1100px]">
+                    <thead className="border-b border-slate-800 bg-slate-950/50">
+                      <tr className="text-left text-xs uppercase tracking-wider text-slate-500">
+                        <th className="px-5 py-4">Document</th>
+                        <th className="px-5 py-4">Type</th>
+                        <th className="px-5 py-4">Category</th>
+                        <th className="px-5 py-4">Project</th>
+                        <th className="px-5 py-4">Customer</th>
+                        <th className="px-5 py-4">Version</th>
+                        <th className="px-5 py-4">Size</th>
+                        <th className="px-5 py-4">Created</th>
+                        <th className="px-5 py-4">Actions</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {filteredDocuments.map((document) => (
+                        <tr
+                          key={document.id}
+                          className="border-b border-slate-800/70 transition hover:bg-slate-800/30"
+                        >
+                          <td className="px-5 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500/10 text-lg">
+                                📄
+                              </div>
+
+                              <div>
+                                <p className="font-medium text-white">
+                                  {document.title}
+                                </p>
+
+                                <p className="text-xs text-slate-500">
+                                  {document.document_code}
+                                </p>
+
+                                <div className="mt-1 flex gap-2">
+                                  {document.is_active && (
+                                    <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-400">
+                                      Active
+                                    </span>
+                                  )}
+
+                                  {document.is_public && (
+                                    <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-medium text-blue-400">
+                                      Public
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+
+                          <td className="px-5 py-4">
+                            <span className="rounded-lg bg-slate-800 px-2.5 py-1 text-xs text-slate-300">
+                              {document.document_type_display}
+                            </span>
+                          </td>
+
+                          <td className="px-5 py-4 text-sm text-slate-300">
+                            {document.category_display}
+                          </td>
+
+                          <td className="px-5 py-4">
+                            {document.project_name ? (
+                              <div>
+                                <p className="text-sm text-white">
+                                  {document.project_name}
+                                </p>
+
+                                <p className="text-xs text-slate-500">
+                                  {document.project
+                                    ? `Project #${document.project}`
+                                    : ""}
+                                </p>
+                              </div>
+                            ) : (
+                              <span className="text-sm text-slate-500">—</span>
+                            )}
+                          </td>
+
+                          <td className="px-5 py-4 text-sm text-slate-300">
+                            {document.customer_name || "—"}
+                          </td>
+
+                          <td className="px-5 py-4 text-sm text-slate-300">
+                            v{document.version}
+                          </td>
+
+                          <td className="px-5 py-4 text-sm text-slate-400">
+                            {formatFileSize(document.file_size)}
+                          </td>
+
+                          <td className="px-5 py-4 text-sm text-slate-400">
+                            {formatDate(document.created_at)}
+                          </td>
+
+                          <td className="px-5 py-4">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => openDocument(document)}
+                                className="rounded-lg border border-slate-700 px-3 py-2 text-xs font-medium text-slate-300 hover:border-cyan-500 hover:text-cyan-400"
+                              >
+                                View
+                              </button>
+
+                              <button
+                                onClick={() => openEditModal(document)}
+                                className="rounded-lg border border-slate-700 px-3 py-2 text-xs font-medium text-slate-300 hover:border-cyan-500 hover:text-cyan-400"
+                              >
+                                Edit
+                              </button>
+
+                              <button
+                                onClick={() => handleDelete(document)}
+                                className="rounded-lg border border-red-900/50 px-3 py-2 text-xs font-medium text-red-400 hover:bg-red-500/10"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </section>
           </div>
-        </div>
-      )}
-    </main>
+
+          {/* Modal */}
+          {showModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+              <div className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl">
+                <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-800 bg-slate-900 px-6 py-5">
+                  <div>
+                    <h2 className="text-xl font-bold">
+                      {editingDocument ? "Edit Document" : "Upload Document"}
+                    </h2>
+
+                    <p className="mt-1 text-xs text-slate-500">
+                      {editingDocument
+                        ? "Update document metadata or replace the file."
+                        : "Add a document to the NEXORA knowledge base."}
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={closeModal}
+                    className="rounded-lg px-3 py-2 text-slate-400 hover:bg-slate-800 hover:text-white"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-6 p-6">
+                  <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-slate-300">
+                        Document Code *
+                      </label>
+
+                      <input
+                        value={form.document_code}
+                        onChange={(event) =>
+                          updateForm("document_code", event.target.value)
+                        }
+                        placeholder="DOC-001"
+                        className="input"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-slate-300">
+                        Version
+                      </label>
+
+                      <input
+                        type="number"
+                        min="1"
+                        value={form.version}
+                        onChange={(event) =>
+                          updateForm("version", event.target.value)
+                        }
+                        className="input"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-300">
+                      Title *
+                    </label>
+
+                    <input
+                      value={form.title}
+                      onChange={(event) =>
+                        updateForm("title", event.target.value)
+                      }
+                      placeholder="Enterprise Security Policy"
+                      className="input"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-300">
+                      Description
+                    </label>
+
+                    <textarea
+                      value={form.description}
+                      onChange={(event) =>
+                        updateForm("description", event.target.value)
+                      }
+                      placeholder="Describe this document..."
+                      rows={4}
+                      className="input resize-none"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-slate-300">
+                        Document Type
+                      </label>
+
+                      <select
+                        value={form.document_type}
+                        onChange={(event) =>
+                          updateForm("document_type", event.target.value)
+                        }
+                        className="input"
+                      >
+                        {DOCUMENT_TYPES.map(([value, label]) => (
+                          <option key={value} value={value}>
+                            {label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-slate-300">
+                        Category
+                      </label>
+
+                      <select
+                        value={form.category}
+                        onChange={(event) =>
+                          updateForm("category", event.target.value)
+                        }
+                        className="input"
+                      >
+                        {CATEGORIES.map(([value, label]) => (
+                          <option key={value} value={value}>
+                            {label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-slate-300">
+                        Project
+                      </label>
+
+                      <select
+                        value={form.project}
+                        onChange={(event) =>
+                          updateForm("project", event.target.value)
+                        }
+                        className="input"
+                      >
+                        <option value="">No project</option>
+
+                        {projects.map((project) => (
+                          <option key={project.id} value={project.id}>
+                            {project.project_code} — {project.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-slate-300">
+                        Customer
+                      </label>
+
+                      <select
+                        value={form.customer}
+                        onChange={(event) =>
+                          updateForm("customer", event.target.value)
+                        }
+                        className="input"
+                      >
+                        <option value="">No customer</option>
+
+                        {customers.map((customer) => (
+                          <option key={customer.id} value={customer.id}>
+                            {customer.company_name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-300">
+                      Document File {!editingDocument && "*"}
+                    </label>
+
+                    <div className="rounded-xl border border-dashed border-slate-700 bg-slate-950/50 p-5">
+                      <input
+                        type="file"
+                        onChange={(event) =>
+                          setSelectedFile(event.target.files?.[0] || null)
+                        }
+                        className="block w-full text-sm text-slate-400 file:mr-4 file:rounded-lg file:border-0 file:bg-cyan-500 file:px-4 file:py-2 file:font-semibold file:text-slate-950 hover:file:bg-cyan-400"
+                      />
+
+                      {selectedFile && (
+                        <p className="mt-3 text-sm text-cyan-400">
+                          Selected: {selectedFile.name} (
+                          {formatFileSize(selectedFile.size)})
+                        </p>
+                      )}
+
+                      {editingDocument && !selectedFile && (
+                        <p className="mt-3 text-xs text-slate-500">
+                          Leave empty to keep the existing file.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-6">
+                    <label className="flex cursor-pointer items-center gap-3">
+                      <input
+                        type="checkbox"
+                        checked={form.is_public}
+                        onChange={(event) =>
+                          updateForm("is_public", event.target.checked)
+                        }
+                        className="h-4 w-4 rounded border-slate-700 bg-slate-950"
+                      />
+
+                      <span className="text-sm text-slate-300">
+                        Public document
+                      </span>
+                    </label>
+
+                    <label className="flex cursor-pointer items-center gap-3">
+                      <input
+                        type="checkbox"
+                        checked={form.is_active}
+                        onChange={(event) =>
+                          updateForm("is_active", event.target.checked)
+                        }
+                        className="h-4 w-4 rounded border-slate-700 bg-slate-950"
+                      />
+
+                      <span className="text-sm text-slate-300">
+                        Active document
+                      </span>
+                    </label>
+                  </div>
+
+                  <div className="flex justify-end gap-3 border-t border-slate-800 pt-5">
+                    <button
+                      type="button"
+                      onClick={closeModal}
+                      disabled={saving}
+                      className="rounded-xl border border-slate-700 px-5 py-3 font-medium text-slate-300 hover:bg-slate-800 disabled:opacity-50"
+                    >
+                      Cancel
+                    </button>
+
+                    <button
+                      type="submit"
+                      disabled={saving}
+                      className="rounded-xl bg-cyan-500 px-6 py-3 font-semibold text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {saving
+                        ? "Saving..."
+                        : editingDocument
+                          ? "Update Document"
+                          : "Upload Document"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+    </WorkspaceLayout>
   );
 }
 

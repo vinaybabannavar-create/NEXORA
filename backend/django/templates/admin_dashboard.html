@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#080d1b" />
+    <title>NEXORA | Admin Command Center</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #080d1b;
+        --sidebar: #0b1223;
+        --panel: #10182b;
+        --panel2: #121d34;
+        --line: #24304b;
+        --text: #edf2ff;
+        --muted: #91a0bf;
+        --purple: #8b5cf6;
+        --blue: #38bdf8;
+        --green: #34d399;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font:
+          14px Inter,
+          system-ui,
+          sans-serif;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .sidebar {
+        position: fixed;
+        inset: 0 auto 0 0;
+        width: 250px;
+        padding: 25px 17px;
+        background: var(--sidebar);
+        border-right: 1px solid var(--line);
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        z-index: 10;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0 8px 27px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .logo {
+        display: grid;
+        place-items: center;
+        width: 45px;
+        height: 45px;
+        flex-shrink: 0;
+        border-radius: 14px;
+        font-size: 23px;
+        font-weight: 800;
+        background: linear-gradient(135deg, #9333ea, #4f46e5);
+        box-shadow: 0 8px 30px #7c3aed35;
+      }
+
+      .brand strong {
+        font-size: 19px;
+        letter-spacing: 0.5px;
+      }
+      .brand small {
+        display: block;
+        color: var(--muted);
+        margin-top: 5px;
+        font-size: 10px;
+      }
+
+      .nav-label {
+        color: #647391;
+        font-size: 10px;
+        letter-spacing: 1.7px;
+        padding: 24px 10px 10px;
+      }
+
+      .nav {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 13px 12px;
+        border-radius: 10px;
+        color: #aab7d1;
+        margin: 3px 0;
+        transition:
+          background 0.2s,
+          color 0.2s;
+      }
+
+      .nav:hover,
+      .nav.active {
+        background: #33236a;
+        color: white;
+      }
+
+      .nav.active {
+        box-shadow: inset 3px 0 var(--purple);
+      }
+      .nav .ico {
+        width: 22px;
+        font-size: 17px;
+        text-align: center;
+      }
+
+      .side-bottom {
+        margin-top: auto;
+        padding: 20px 8px 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .user-chip {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        min-width: 0;
+      }
+      .user-chip > div:last-child {
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+      .user-chip strong {
+        font-size: 12px;
+      }
+
+      .avatar {
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+        border-radius: 13px;
+        display: grid;
+        place-items: center;
+        background: #293654;
+        font-weight: 700;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+      .user-chip small {
+        display: block;
+        margin-top: 4px;
+      }
+
+      .main {
+        margin-left: 250px;
+        min-width: 0;
+      }
+
+      .topbar {
+        min-height: 72px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 14px 32px;
+        border-bottom: 1px solid var(--line);
+        background: #0b1223;
+        position: sticky;
+        top: 0;
+        z-index: 5;
+      }
+
+      .crumb {
+        color: var(--muted);
+      }
+      .crumb b {
+        color: var(--text);
+        margin-left: 8px;
+      }
+
+      .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .search {
+        color: var(--muted);
+        background: var(--panel);
+        border: 1px solid var(--line);
+        padding: 11px 15px;
+        border-radius: 10px;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 11px 14px;
+        background: var(--panel2);
+        color: var(--text);
+        cursor: pointer;
+        font: inherit;
+        white-space: nowrap;
+        transition:
+          transform 0.2s,
+          border-color 0.2s;
+      }
+
+      .button:hover {
+        transform: translateY(-1px);
+        border-color: var(--purple);
+      }
+
+      .content {
+        padding: 32px;
+        max-width: 1650px;
+        margin: auto;
+      }
+
+      .eyebrow {
+        color: #a78bfa;
+        font-weight: 700;
+        letter-spacing: 2px;
+        font-size: 10px;
+      }
+
+      h1 {
+        font-size: clamp(25px, 3vw, 35px);
+        margin: 10px 0;
+        letter-spacing: -1.2px;
+      }
+
+      h2 {
+        font-size: 16px;
+        margin: 0;
+      }
+      p {
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .welcome {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        align-items: center;
+        margin-bottom: 27px;
+      }
+
+      .welcome p {
+        margin-bottom: 0;
+      }
+
+      .date {
+        text-align: right;
+        color: var(--muted);
+        line-height: 1.8;
+        font-size: 12px;
+      }
+
+      .date strong {
+        color: var(--text);
+        display: block;
+        font-size: 14px;
+      }
+
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 15px;
+      }
+
+      .card {
+        min-width: 0;
+        background: linear-gradient(145deg, #121d34, #0e1729);
+        border: 1px solid var(--line);
+        border-radius: 15px;
+        transition:
+          border-color 0.2s,
+          transform 0.2s;
+      }
+
+      .card:hover {
+        border-color: #514080;
+      }
+
+      .metric {
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .metric:after {
+        content: "";
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        right: -45px;
+        bottom: -55px;
+        border-radius: 50%;
+        background: #8b5cf618;
+        filter: blur(5px);
+        pointer-events: none;
+      }
+
+      .metric-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        color: var(--muted);
+      }
+
+      .metric-icon {
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+        display: grid;
+        place-items: center;
+        border-radius: 12px;
+        background: #7c3aed24;
+        color: #c4b5fd;
+        font-size: 19px;
+      }
+
+      .metric-value {
+        font-size: clamp(25px, 2.5vw, 32px);
+        font-weight: 800;
+        letter-spacing: -1px;
+        margin: 19px 0 8px;
+        overflow-wrap: anywhere;
+      }
+
+      .metric-foot {
+        color: var(--muted);
+        font-size: 11px;
+      }
+      .accent-blue .metric-icon {
+        background: #0284c724;
+        color: var(--blue);
+      }
+      .accent-green .metric-icon {
+        background: #05966924;
+        color: var(--green);
+      }
+      .accent-cyan .metric-icon {
+        background: #0891b224;
+        color: #67e8f9;
+      }
+
+      .lower {
+        display: grid;
+        grid-template-columns: minmax(0, 1.4fr) minmax(270px, 1fr);
+        gap: 18px;
+        margin-top: 21px;
+      }
+
+      .panel-head {
+        padding: 20px 22px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--line);
+        gap: 12px;
+      }
+
+      .panel-head p {
+        font-size: 12px;
+        margin: 6px 0 0;
+      }
+      .panel-body {
+        padding: 20px 22px;
+      }
+
+      .dept {
+        margin: 18px 0;
+      }
+      .dept-line {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 9px;
+        font-size: 12px;
+      }
+
+      .track {
+        height: 6px;
+        background: #25314b;
+        border-radius: 20px;
+        overflow: hidden;
+      }
+
+      .fill {
+        height: 100%;
+        background: linear-gradient(90deg, #8b5cf6, #38bdf8);
+        border-radius: 20px;
+      }
+
+      .quick {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 15px 0;
+        border-bottom: 1px solid #202b43;
+      }
+
+      .quick:last-child {
+        border: 0;
+      }
+      .quick strong {
+        font-size: 12px;
+      }
+
+      .quick small {
+        display: block;
+        color: var(--muted);
+        margin-top: 5px;
+        font-size: 11px;
+      }
+
+      .quick a {
+        color: #c4b5fd;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+      .quick a:hover {
+        color: white;
+      }
+
+      .footer {
+        padding-top: 25px;
+        text-align: center;
+        color: #61708f;
+        font-size: 10px;
+        letter-spacing: 1px;
+      }
+
+      @media (max-width: 1150px) {
+        .sidebar {
+          width: 220px;
+        }
+        .main {
+          margin-left: 220px;
+        }
+        .metrics {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .lower {
+          grid-template-columns: 1fr;
+        }
+        .content {
+          padding: 25px;
+        }
+        .topbar {
+          padding: 14px 25px;
+        }
+      }
+
+      @media (max-width: 700px) {
+        .sidebar {
+          position: static;
+          width: auto;
+          padding: 14px;
+          overflow: visible;
+        }
+
+        .brand {
+          padding-bottom: 14px;
+        }
+        .nav-label,
+        .side-bottom {
+          display: none;
+        }
+
+        .sidebar nav {
+          display: flex;
+          overflow-x: auto;
+          gap: 5px;
+          padding-top: 10px;
+        }
+
+        .nav {
+          flex: 0 0 auto;
+          padding: 10px;
+          font-size: 12px;
+        }
+        .main {
+          margin-left: 0;
+        }
+
+        .topbar {
+          min-height: 58px;
+          padding: 12px 15px;
+          position: static;
+          flex-wrap: wrap;
+        }
+
+        .search {
+          display: none;
+        }
+        .top-actions {
+          margin-left: auto;
+        }
+        .content {
+          padding: 22px 14px;
+        }
+
+        .welcome {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .date {
+          text-align: left;
+        }
+        .metrics {
+          gap: 10px;
+        }
+        .metric {
+          padding: 13px;
+        }
+        .metric-value {
+          font-size: 25px;
+          margin-top: 14px;
+        }
+        .metric-top {
+          font-size: 11px;
+        }
+        .metric-icon {
+          width: 34px;
+          height: 34px;
+        }
+        .panel-head,
+        .panel-body {
+          padding: 16px;
+        }
+      }
+
+      @media (max-width: 380px) {
+        .metrics {
+          grid-template-columns: 1fr;
+        }
+        .top-actions .button {
+          padding: 9px;
+          font-size: 11px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <a class="brand" href="{% url 'admin_dashboard' %}">
+          <span class="logo">N</span>
+          <span>
+            <strong>NEXORA</strong>
+            <small>ENTERPRISE INTELLIGENCE</small>
+          </span>
+        </a>
+
+        <nav>
+          <div class="nav-label">WORKSPACE</div>
+          <a class="nav active" href="{% url 'admin_dashboard' %}">
+            <span class="ico">◈</span> Overview
+          </a>
+
+          <div class="nav-label">MANAGEMENT</div>
+          <a
+            class="nav"
+            href="{% url 'admin:nexora_accounts_user_changelist' %}"
+            ><span class="ico">♙</span> Users</a
+          >
+          <a class="nav" href="{% url 'admin:nexora_api_customer_changelist' %}"
+            ><span class="ico">◇</span> Customers</a
+          >
+          <a
+            class="nav"
+            href="{% url 'admin:nexora_api_department_changelist' %}"
+            ><span class="ico">▦</span> Departments</a
+          >
+          <a class="nav" href="{% url 'admin:nexora_api_employee_changelist' %}"
+            ><span class="ico">♧</span> Employees</a
+          >
+          <a class="nav" href="{% url 'admin:index' %}"
+            ><span class="ico">▧</span> Projects</a
+          >
+          <a class="nav" href="{% url 'admin:index' %}"
+            ><span class="ico">▤</span> Documents &amp; AI</a
+          >
+          <a class="nav" href="{% url 'admin:index' %}"
+            ><span class="ico">⌁</span> Support tickets</a
+          >
+        </nav>
+
+        <div class="side-bottom">
+          <div class="user-chip">
+            <div class="avatar">
+              {{ request.user.first_name|default:request.user.email|first|upper
+              }}
+            </div>
+            <div>
+              <strong
+                >{{ request.user.get_full_name|default:request.user.email
+                }}</strong
+              >
+              <small class="muted">Administrator</small>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div class="crumb">Workspace / <b>Admin Command Center</b></div>
+          <div class="top-actions">
+            <div class="search">⌕ &nbsp; Search management</div>
+            <a class="button" href="{% url 'admin:index' %}">Django Admin ↗</a>
+          </div>
+        </header>
+
+        <div class="content">
+          <section class="welcome">
+            <div>
+              <div class="eyebrow">NEXORA · OPERATIONS INTELLIGENCE</div>
+              <h1>Command Center<span style="color: #a78bfa">.</span></h1>
+              <p>
+                Your organization at a glance. Welcome back, {{
+                request.user.first_name|default:request.user.email }}.
+              </p>
+            </div>
+            <div class="date">
+              <strong>Live workspace</strong>
+              Operational overview · Database-backed metrics
+            </div>
+          </section>
+
+          <section class="metrics">
+            <article class="card metric">
+              <div class="metric-top">
+                <span>Total users</span><span class="metric-icon">♙</span>
+              </div>
+              <div class="metric-value">{{ total_users }}</div>
+              <div class="metric-foot">{{ active_users }} active accounts</div>
+            </article>
+
+            <article class="card metric accent-blue">
+              <div class="metric-top">
+                <span>Employees</span><span class="metric-icon">♧</span>
+              </div>
+              <div class="metric-value">{{ total_employees }}</div>
+              <div class="metric-foot">
+                {{ active_employees }} active employees
+              </div>
+            </article>
+
+            <article class="card metric accent-green">
+              <div class="metric-top">
+                <span>Customers</span><span class="metric-icon">◇</span>
+              </div>
+              <div class="metric-value">{{ total_customers }}</div>
+              <div class="metric-foot">Registered organizations</div>
+            </article>
+
+            <article class="card metric accent-cyan">
+              <div class="metric-top">
+                <span>Departments</span><span class="metric-icon">▦</span>
+              </div>
+              <div class="metric-value">{{ total_departments }}</div>
+              <div class="metric-foot">Organization structure</div>
+            </article>
+
+            <article class="card metric">
+              <div class="metric-top">
+                <span>Projects</span><span class="metric-icon">▧</span>
+              </div>
+              <div class="metric-value">{{ total_projects }}</div>
+              <div class="metric-foot">Total tracked projects</div>
+            </article>
+
+            <article class="card metric accent-blue">
+              <div class="metric-top">
+                <span>AI documents</span><span class="metric-icon">▤</span>
+              </div>
+              <div class="metric-value">{{ total_documents }}</div>
+              <div class="metric-foot">Documents in the platform</div>
+            </article>
+
+            <article class="card metric accent-green">
+              <div class="metric-top">
+                <span>Support tickets</span><span class="metric-icon">⌁</span>
+              </div>
+              <div class="metric-value">{{ total_support_tickets }}</div>
+              <div class="metric-foot">Tickets recorded</div>
+            </article>
+          </section>
+
+          <section class="lower">
+            <article class="card">
+              <div class="panel-head">
+                <div>
+                  <h2>Department overview</h2>
+                  <p>Largest teams by employee count</p>
+                </div>
+                <span class="metric-icon">▥</span>
+              </div>
+
+              <div class="panel-body">
+                {% for department in department_stats %}
+                <div class="dept">
+                  <div class="dept-line">
+                    <span>{{ department.name }}</span>
+                    <span class="muted"
+                      >{{ department.staff_count }} employees</span
+                    >
+                  </div>
+
+                  <div class="track">
+                    <div class="fill department-progress"></div>
+                  </div>
+                </div>
+                {% empty %}
+                <p>No departments have been created yet.</p>
+                {% endfor %}
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="panel-head">
+                <div>
+                  <h2>Quick actions</h2>
+                  <p>Jump into administration</p>
+                </div>
+                <span class="metric-icon">✦</span>
+              </div>
+
+              <div class="panel-body">
+                <div class="quick">
+                  <div>
+                    <strong>Manage users</strong
+                    ><small>Accounts and permissions</small>
+                  </div>
+                  <a href="{% url 'admin:nexora_accounts_user_changelist' %}"
+                    >Open ↗</a
+                  >
+                </div>
+
+                <div class="quick">
+                  <div>
+                    <strong>Manage customers</strong
+                    ><small>Customer records and plans</small>
+                  </div>
+                  <a href="{% url 'admin:nexora_api_customer_changelist' %}"
+                    >Open ↗</a
+                  >
+                </div>
+
+                <div class="quick">
+                  <div>
+                    <strong>Manage employees</strong
+                    ><small>People and departments</small>
+                  </div>
+                  <a href="{% url 'admin:nexora_api_employee_changelist' %}"
+                    >Open ↗</a
+                  >
+                </div>
+
+                <div class="quick">
+                  <div>
+                    <strong>Open Django Admin</strong
+                    ><small>All registered admin tools</small>
+                  </div>
+                  <a href="{% url 'admin:index' %}">Open ↗</a>
+                </div>
+              </div>
+            </article>
+          </section>
+
+          <div class="footer">
+            NEXORA ENTERPRISE INTELLIGENCE · ADMIN COMMAND CENTER
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
