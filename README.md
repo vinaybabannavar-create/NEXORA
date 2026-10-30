@@ -28,6 +28,8 @@
 [Admin console](#-admin-console) ·
 [Workspace](#-main-workspace) ·
 [AI/RAG](#-ai--rag-pipeline) ·
+[Voice assistant](#-nexora-voice-assistant) ·
+[Latest updates](#-latest-development-updates) ·
 [API reference](#-service-endpoints) ·
 [Testing](#-testing--verification) ·
 [Roadmap](#-implementation-roadmap) ·
@@ -44,6 +46,20 @@ NEXORA is a modular enterprise platform foundation designed to bring company ope
 It separates responsibilities across a Next.js web application, a Django REST Framework core API, a FastAPI AI service, a Node.js + Socket.IO realtime service, and dedicated infrastructure services.
 
 > **Implementation truth:** This README describes the known project foundation and the intended product direction. A feature listed as planned is not necessarily implemented. Inspect the repository and verify each endpoint, screen, dependency, and test before treating it as complete.
+
+
+### Latest development updates
+
+| Area | Recent update | Status |
+| --- | --- | --- |
+| Django Admin | Updated the Unfold admin presentation, corrected display-header handling, and added a custom admin dashboard. | Implemented in the latest local development work; verify against the current branch. |
+| Database configuration | Added/updated a SQLite fallback for development while aligning the main local setup with PostgreSQL. | Configuration-dependent; PostgreSQL remains the intended primary database. |
+| Main workspace | Improved the responsive workspace shell, navigation/sidebar, and header layout. | Implemented; verify desktop and mobile breakpoints. |
+| UI icons | Added Lucide React to the frontend for consistent icons. | Frontend dependency added. |
+| Voice assistant | Added a floating voice-assistant interface, spoken welcome interaction, and voice-command handling. | Local implementation reported; see the dedicated section below. |
+| Voice-search fallback | Added fallback intent/data retrieval for selected enterprise searches when Gemini is rate-limited. | Sample employee/customer searches reported working locally; security review is required before production. |
+
+**Gemini quota note:** The latest development report described a `429 RESOURCE_EXHAUSTED` response caused by a free-tier request quota. The fallback may keep selected commands working, but it does not increase or restore the Gemini API quota.
 
 | Area                      | Current foundation / intended direction                            |
 | ------------------------- | ------------------------------------------------------------------ |
@@ -663,6 +679,124 @@ flowchart TD
 
 ---
 
+
+---
+
+## 🎙️ NEXORA Voice Assistant
+
+NEXORA includes a developing voice-assistant experience intended to make common workspace actions available through natural speech. The goal is a conversational enterprise assistant—not simply a speech-to-text box or a collection of hard-coded replies.
+
+### Current reported capabilities
+
+- A floating voice-assistant entry point in the workspace.
+- A spoken welcome message when the user activates the assistant, subject to browser audio/autoplay permissions.
+- Voice-oriented commands for common workspace navigation, such as opening the Employees page.
+- Intent handling for selected enterprise searches, including employee and customer lookup.
+- A fallback command/data-retrieval path for selected intents when Gemini is unavailable or rate-limited.
+- Response text and action metadata intended to let the frontend present a result or navigate to a workspace page.
+
+### Example commands
+
+| Example phrase | Intended behavior |
+| --- | --- |
+| `Open employees` | Navigate to the Employees page. |
+| `Open projects` | Navigate to Projects, if the route is available to the signed-in user. |
+| `Search for Rahul` | Search employee records using the authorized search path. |
+| `Search for customers` | Search customer records the user is permitted to view. |
+| `Show my pending tasks` | Retrieve the signed-in user's pending tasks, if implemented. |
+
+The supported commands depend on the current intent parser, registered actions, routes, and backend permissions. This example list is not proof that every command is implemented.
+
+### Voice interaction flow
+
+```mermaid
+flowchart TD
+    USER[Signed-in user]
+    UI[Next.js workspace and voice panel]
+    MIC[Browser microphone permission and capture]
+    INTENT[Voice transcription / intent detection]
+    GEM[Gemini API when available]
+    FALLBACK[Limited local intent and data fallback]
+    AUTH[Django authorization and business APIs]
+    ACTION[Approved navigation or search action]
+    SPEAK[Browser speech output]
+
+    USER --> UI
+    UI --> MIC
+    MIC --> INTENT
+    INTENT --> GEM
+    GEM -->|Provider unavailable / quota limited| FALLBACK
+    GEM --> AUTH
+    FALLBACK --> AUTH
+    AUTH --> ACTION
+    ACTION --> UI
+    UI --> SPEAK
+```
+
+### Browser audio and microphone behavior
+
+- Browsers may block speech until the user interacts with the page. Activate the assistant or use an explicit start button before expecting audio.
+- Microphone access requires browser permission and a secure context. `localhost` is generally treated as a secure development context by modern browsers.
+- The assistant should clearly show when microphone capture is active and provide a visible way to stop it.
+- Do not record or transmit audio in the background without clear user action and visible status.
+- Speech synthesis and microphone capture are separate capabilities; hearing a welcome message does not prove microphone capture is working.
+- Test in target browsers and inspect console errors for permission, audio, and speech-recognition failures.
+
+### Cross-device voice experience: verification required
+
+The longer-term experience is to use a mobile phone as the microphone while the laptop plays responses through its speakers. A QR-based pairing flow and secure realtime session would be needed.
+
+**Do not assume cross-device pairing is complete.** The latest development report confirms a desktop voice-panel update and sample command behavior, but does not establish that mobile-to-laptop QR pairing, realtime audio transport, interruption handling, or a persistent wake-word listener has been fully implemented and tested.
+
+A production cross-device implementation should include:
+
+- Short-lived, single-use pairing tokens.
+- Authenticated session ownership and role checks.
+- Encrypted WebSocket transport (`wss://`) outside local development.
+- Explicit microphone permission and a visible recording indicator.
+- Session expiry, disconnect handling, and rate limiting.
+- No API keys or privileged credentials in browser/mobile code.
+- Server-side authorization for every business-data lookup and action.
+
+### Voice assistant security note
+
+A development fallback has been reported to query PostgreSQL tables directly for selected voice-search intents. Direct database access from the AI/voice service can bypass Django authentication, role checks, and object-level permissions if it is not carefully constrained.
+
+For production, route business-data operations through authorized Django APIs or a shared authorization-enforcing service. If direct database access is temporarily retained for local development, keep it read-only, parameterized, restricted to the minimum required records, and unavailable to untrusted clients. Parameterized SQL helps prevent injection; it does **not** replace authorization.
+
+### Voice assistant verification checklist
+
+- [ ] Activate the assistant and confirm the welcome message is audible.
+- [ ] Grant microphone permission and confirm the UI visibly indicates capture.
+- [ ] Say `Open employees` and verify actual navigation.
+- [ ] Say `Search for Rahul` and verify results respect the signed-in user's permissions.
+- [ ] Test an unauthorized query and confirm the server rejects it.
+- [ ] Test behavior when Gemini is rate-limited or unavailable.
+- [ ] Confirm the assistant does not claim an action succeeded when it failed.
+- [ ] Confirm microphone capture stops when the user closes/stops the assistant.
+- [ ] Test mobile-to-laptop pairing separately before documenting it as supported.
+
+---
+
+## 🧩 Latest development updates
+
+### Django Admin experience
+
+The latest development work includes an Unfold-based admin UI update, a custom dashboard, and corrections to display-header handling. The goal is a cleaner administrative experience while retaining Django's server-side admin permissions.
+
+### Workspace experience
+
+The main workspace has been updated with a more modern responsive shell, including navigation and header layout improvements. Lucide React is used for consistent iconography in the frontend.
+
+### Database development configuration
+
+The project has included a SQLite fallback for development while PostgreSQL remains the intended primary database for the full enterprise setup. Confirm the active database from the current Django settings and environment before running migrations or tests. Switching database engines does not automatically migrate existing data.
+
+### Gemini availability and fallback behavior
+
+Gemini-powered responses depend on provider availability, model access, API configuration, and quota. A reported `429 RESOURCE_EXHAUSTED` error means the provider rejected a request due to quota/rate limits. The local fallback may handle only explicitly supported intents; it is not a replacement for full Gemini conversation capability.
+
+
 ## 🔌 Service endpoints
 
 The following are **known local service addresses**, not a complete endpoint contract.
@@ -744,6 +878,12 @@ From `services/realtime/`, inspect the scripts in `package.json` and run the rel
 - [ ] Realtime events require valid authorization.
 - [ ] Frontend lint/build checks pass.
 - [ ] Mobile and desktop layouts are usable.
+- [ ] Django Admin loads and its custom dashboard displays correctly.
+- [ ] Workspace navigation and responsive header work at desktop and mobile widths.
+- [ ] Voice welcome audio works after explicit user interaction.
+- [ ] Microphone capture and stop behavior are verified separately from speech output.
+- [ ] Voice search enforces the same authorization rules as normal workspace APIs.
+- [ ] Cross-device voice pairing is marked unsupported until end-to-end testing passes.
 - [ ] No secrets are tracked by Git.
 
 A command being available is not proof that the project passes it. Record real outputs and fix failures before declaring the feature complete.
