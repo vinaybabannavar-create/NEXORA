@@ -30,12 +30,19 @@ class VectorStore:
         host: str = "localhost",
         port: int = 6333,
     ) -> None:
-        self.client = QdrantClient(
-            host=host,
-            port=port,
-        )
-
-        self._ensure_collection()
+        try:
+            self.client = QdrantClient(
+                host=host,
+                port=port,
+            )
+            self._ensure_collection()
+        except Exception as exc:
+            print(
+                f"[VectorStore] Notice: Could not connect to Qdrant at {host}:{port} ({exc}). "
+                "Falling back to local in-memory Qdrant instance."
+            )
+            self.client = QdrantClient(":memory:")
+            self._ensure_collection()
 
     def _ensure_collection(self) -> None:
         collections = self.client.get_collections()

@@ -1,0 +1,11 @@
+{% load i18n unfold_list %}
+
+{% if cl.has_filters and cl|unfold_vertical_filters|length > 0 %}
+    <a class="filter-open-button inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium border border-zinc-700/80 bg-zinc-900/90 text-zinc-200 hover:text-white hover:bg-zinc-800 transition-all duration-150 cursor-pointer shadow-xs lg:ml-auto" x-on:click="filterOpen = true" x-on:keydown.escape.window="filterOpen = false">
+        <span class="material-symbols-outlined text-[18px] leading-none text-zinc-400">tune</span>
+        <span>{% trans "Filters" %}</span>
+        {% if cl.has_active_filters %}
+            <span class="inline-flex items-center justify-center w-2 h-2 rounded-full bg-violet-500"></span>
+        {% endif %}
+    </a>
+{% endif %}

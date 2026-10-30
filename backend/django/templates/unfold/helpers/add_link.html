@@ -1,0 +1,20 @@
+{% load i18n admin_urls %}
+
+{% if cl %}
+    {% url cl.opts|admin_urlname:"add" as add_url %}
+    {% blocktranslate with name=cl.opts.verbose_name asvar title %}Add {{ name|capfirst }}{% endblocktranslate %}
+{% else %}
+    {% url opts|admin_urlname:"add" as add_url %}
+    {% blocktranslate with name=opts.verbose_name asvar title %}Add {{ name|capfirst }}{% endblocktranslate %}
+{% endif %}
+
+{% if add_url %}
+    {% if cl.model_admin.show_add_link or adminform.model_admin.show_add_link %}
+        <div class="flex flex-row items-center">
+            <a href="{% add_preserved_filters add_url is_popup to_field %}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-xs tracking-wide uppercase text-white bg-violet-600 hover:bg-violet-500 active:bg-violet-700 shadow-md shadow-violet-600/20 border border-violet-500/40 transition-all duration-150 transform hover:-translate-y-0.5 cursor-pointer" title="{{ title }}">
+                <span class="material-symbols-outlined text-[18px] leading-none">add</span>
+                <span class="font-medium tracking-normal text-sm lowercase first-letter:uppercase">{{ title }}</span>
+            </a>
+        </div>
+    {% endif %}
+{% endif %}

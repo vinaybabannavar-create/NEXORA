@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 
 
-# Load environment variables from backend/fastapi/.env
+# Load environment variables from backend/fastapi/.env or current working directory
+_fastapi_dir = Path(__file__).resolve().parent.parent.parent
+load_dotenv(dotenv_path=_fastapi_dir / ".env")
 load_dotenv()
 
 
@@ -25,7 +28,21 @@ class LLMService:
             "GEMINI_MODEL",
             "gemini-3.8-flash",
         )
+        self.client: genai.Client | None = None
 
+        if self.api_key:
+            try:
+                self.client = genai.Client(
+                    api_key=self.api_key
+                )
+            except Exception as exc:
+                print(f"[LLMService] Notice: Failed to initialize Gemini client: {exc}")
+
+    def _ensure_client(self) -> genai.Client:
+        if self.client is not None:
+            return self.client
+
+        self.api_key = os.getenv("GEMINI_API_KEY")
         if not self.api_key:
             raise RuntimeError(
                 "GEMINI_API_KEY is not configured. "
@@ -35,6 +52,7 @@ class LLMService:
         self.client = genai.Client(
             api_key=self.api_key
         )
+        return self.client
 
     def generate_answer(
         self,
@@ -91,7 +109,8 @@ Provide a grounded answer based ONLY on the
 document context above.
 """
 
-        response = self.client.models.generate_content(
+        client = self._ensure_client()
+        response = client.models.generate_content(
             model=self.model,
             contents=prompt,
             config=types.GenerateContentConfig(

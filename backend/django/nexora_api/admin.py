@@ -1,6 +1,6 @@
 from django.contrib import admin
-
-from .models import Customer, Department, Employee
+from unfold.admin import ModelAdmin
+from unfold.decorators import display
 
 from .models import (
     Customer,
@@ -13,12 +13,12 @@ from .models import (
 )
 
 @admin.register(Department)
-class DepartmentAdmin(admin.ModelAdmin):
+class DepartmentAdmin(ModelAdmin):
     list_display = (
-        "name",
+        "display_name",
         "code",
         "department_head",
-        "is_active",
+        "display_active",
         "employee_count",
         "created_at",
     )
@@ -50,6 +50,15 @@ class DepartmentAdmin(admin.ModelAdmin):
         "updated_at",
     )
 
+    @display(description="Department", header=True)
+    def display_name(self, instance: Department):
+        initials = instance.code[:2].upper() if instance.code else instance.name[:2].upper()
+        return [instance.name, instance.code or "", initials]
+
+    @display(description="Active", boolean=True)
+    def display_active(self, instance: Department):
+        return instance.is_active
+
     def employee_count(self, obj):
         return obj.employees.count()
 
@@ -57,15 +66,14 @@ class DepartmentAdmin(admin.ModelAdmin):
 
 
 @admin.register(Employee)
-class EmployeeAdmin(admin.ModelAdmin):
+class EmployeeAdmin(ModelAdmin):
     list_display = (
         "employee_id",
-        "first_name",
-        "last_name",
+        "display_name",
         "email",
         "department",
         "job_title",
-        "is_active",
+        "display_active",
     )
 
     list_filter = (
@@ -83,17 +91,27 @@ class EmployeeAdmin(admin.ModelAdmin):
 
     ordering = ("employee_id",)
 
+    @display(description="Name", header=True)
+    def display_name(self, instance: Employee):
+        name = f"{instance.first_name} {instance.last_name}".strip()
+        initials = f"{instance.first_name[:1]}{instance.last_name[:1]}".upper() if instance.first_name else "--"
+        return [name, instance.email or instance.employee_id or "", initials]
+
+    @display(description="Active", boolean=True)
+    def display_active(self, instance: Employee):
+        return instance.is_active
+
 
 @admin.register(Customer)
-class CustomerAdmin(admin.ModelAdmin):
+class CustomerAdmin(ModelAdmin):
     list_display = (
-        "company_name",
+        "display_company",
         "contact_name",
         "email",
-        "region",
-        "plan_tier",
-        "nps_score",
-        "is_active",
+        "display_region",
+        "display_plan_tier",
+        "display_nps",
+        "display_active",
         "created_at",
     )
 
@@ -117,6 +135,35 @@ class CustomerAdmin(admin.ModelAdmin):
         "created_at",
         "updated_at",
     )
+
+    @display(description="Company", header=True)
+    def display_company(self, instance: Customer):
+        initials = instance.company_name[:2].upper() if instance.company_name else "--"
+        return [instance.company_name, instance.contact_name or "", initials]
+
+    @display(
+        description="Plan Tier",
+        label={
+            Customer.PLAN_ENTERPRISE: "danger",
+            Customer.PLAN_PREMIUM: "warning",
+            Customer.PLAN_STANDARD: "info",
+            Customer.PLAN_BASIC: "default",
+        },
+    )
+    def display_plan_tier(self, instance: Customer):
+        return instance.plan_tier
+
+    @display(description="Active", boolean=True)
+    def display_active(self, instance: Customer):
+        return instance.is_active
+
+    @display(description="Region")
+    def display_region(self, instance: Customer):
+        return instance.region or "-"
+
+    @display(description="NPS Score")
+    def display_nps(self, instance: Customer):
+        return instance.nps_score if instance.nps_score is not None else "-"
 
     fieldsets = (
         (

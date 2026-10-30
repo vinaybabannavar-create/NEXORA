@@ -1,0 +1,488 @@
+{% extends 'admin/base.html' %}
+{% load i18n %}
+
+{% block breadcrumbs %}{% endblock %}
+{% block title %}Dashboard | NEXORA Admin{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+/* ── Reset & Base ─────────────────────────────────────────────── */
+.nxdb * { box-sizing: border-box; }
+.nxdb a { text-decoration: none; color: inherit; }
+
+/* ── Layout Wrapper ───────────────────────────────────────────── */
+.nxdb {
+  padding: 28px 32px 56px;
+  background: #09090b;
+  min-height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif;
+}
+
+/* ── Page Header ──────────────────────────────────────────────── */
+.nxdb-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-bottom: 24px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.nxdb-hdr-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.nxdb-hdr-icon {
+  width: 48px; height: 48px;
+  background: rgba(139,92,246,0.15);
+  border: 1px solid rgba(139,92,246,0.3);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  color: #a78bfa;
+}
+.nxdb-hdr-icon .material-symbols-outlined { font-size: 26px !important; }
+.nxdb-h1 {
+  font-size: 22px; font-weight: 700; color: #f4f4f5;
+  margin: 0; letter-spacing: -0.02em;
+}
+.nxdb-sub { font-size: 13px; color: #71717a; margin: 3px 0 0; }
+.nxdb-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.nxdb-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 18px; border-radius: 8px;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: all 0.18s ease; white-space: nowrap;
+}
+.nxdb-btn .material-symbols-outlined { font-size: 17px !important; }
+.nxdb-btn-primary {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: #fff; border: 1px solid rgba(139,92,246,0.4);
+  box-shadow: 0 2px 10px rgba(139,92,246,0.3);
+}
+.nxdb-btn-primary:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  box-shadow: 0 4px 16px rgba(139,92,246,0.45);
+  transform: translateY(-1px);
+}
+.nxdb-btn-ghost {
+  background: #18191e; color: #d4d4d8;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.nxdb-btn-ghost:hover {
+  background: #222329; color: #fff;
+  border-color: rgba(255,255,255,0.2);
+}
+
+/* ── Stats Row ────────────────────────────────────────────────── */
+.nxdb-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+@media (max-width: 1100px) { .nxdb-stats { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px)  { .nxdb-stats { grid-template-columns: 1fr; } }
+
+.nxdb-stat {
+  display: flex; align-items: center; gap: 16px;
+  padding: 20px 22px;
+  background: #141518;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16,1,0.3,1);
+  position: relative; overflow: hidden;
+}
+.nxdb-stat::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 2px;
+  border-radius: 14px 14px 0 0;
+}
+.nxdb-stat:hover {
+  background: #1a1b21;
+  border-color: rgba(255,255,255,0.14);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.4);
+}
+.nxdb-stat-v::before { background: linear-gradient(90deg, #8b5cf6, #6d28d9); }
+.nxdb-stat-g::before { background: linear-gradient(90deg, #10b981, #059669); }
+.nxdb-stat-a::before { background: linear-gradient(90deg, #f59e0b, #d97706); }
+.nxdb-stat-r::before { background: linear-gradient(90deg, #f43f5e, #e11d48); }
+
+.nxdb-stat-ico {
+  width: 46px; height: 46px; min-width: 46px;
+  border-radius: 11px; display: flex;
+  align-items: center; justify-content: center;
+  border: 1px solid transparent;
+}
+.nxdb-stat-ico .material-symbols-outlined { font-size: 22px !important; }
+.nxdb-stat-v .nxdb-stat-ico { background: rgba(139,92,246,0.15); color: #a78bfa; border-color: rgba(139,92,246,0.3); }
+.nxdb-stat-g .nxdb-stat-ico { background: rgba(16,185,129,0.15); color: #34d399; border-color: rgba(16,185,129,0.3); }
+.nxdb-stat-a .nxdb-stat-ico { background: rgba(245,158,11,0.15); color: #fbbf24; border-color: rgba(245,158,11,0.3); }
+.nxdb-stat-r .nxdb-stat-ico { background: rgba(244,63,94,0.15);  color: #fb7185; border-color: rgba(244,63,94,0.3); }
+
+.nxdb-stat-body { flex: 1; min-width: 0; }
+.nxdb-stat-lbl {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.07em; color: #71717a; margin-bottom: 4px;
+}
+.nxdb-stat-val { font-size: 20px; font-weight: 800; color: #f4f4f5; letter-spacing: -0.02em; }
+.nxdb-stat-hint { font-size: 12px; color: #52525b; margin-top: 2px; }
+.nxdb-stat-arr { color: #3f3f46; font-size: 18px !important; transition: all 0.2s ease; }
+.nxdb-stat:hover .nxdb-stat-arr { color: #a78bfa; transform: translateX(3px); }
+
+/* ── Main 2-Column ────────────────────────────────────────────── */
+.nxdb-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 24px;
+  align-items: start;
+}
+@media (max-width: 1024px) { .nxdb-grid { grid-template-columns: 1fr; } }
+
+/* ── App Cards ────────────────────────────────────────────────── */
+.nxdb-apps { display: flex; flex-direction: column; gap: 20px; }
+.nxdb-app-card {
+  background: #141518;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+}
+.nxdb-app-hdr {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 20px;
+  background: #101114;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.nxdb-app-ico {
+  width: 36px; height: 36px; min-width: 36px;
+  border-radius: 8px;
+  background: rgba(139,92,246,0.12);
+  border: 1px solid rgba(139,92,246,0.25);
+  color: #a78bfa;
+  display: flex; align-items: center; justify-content: center;
+}
+.nxdb-app-ico .material-symbols-outlined { font-size: 18px !important; }
+.nxdb-app-name { font-size: 14px; font-weight: 700; color: #f4f4f5; margin: 0; }
+.nxdb-app-count { font-size: 11px; color: #52525b; margin: 2px 0 0; text-transform: uppercase; letter-spacing: 0.05em; }
+
+.nxdb-model-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: background 0.15s ease;
+}
+.nxdb-model-row:last-child { border-bottom: none; }
+.nxdb-model-row:hover { background: rgba(255,255,255,0.03); }
+.nxdb-model-left { display: flex; align-items: center; gap: 12px; }
+.nxdb-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #3f3f46;
+  transition: background 0.15s, transform 0.15s;
+}
+.nxdb-model-row:hover .nxdb-dot { background: #8b5cf6; transform: scale(1.4); }
+.nxdb-model-name { font-size: 14px; font-weight: 500; color: #e4e4e7; }
+.nxdb-model-btns { display: flex; align-items: center; gap: 8px; }
+
+.nxdb-mbtn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 14px; border-radius: 6px;
+  font-size: 12.5px; font-weight: 600;
+  transition: all 0.15s ease; cursor: pointer;
+}
+.nxdb-mbtn .material-symbols-outlined { font-size: 14px !important; }
+.nxdb-mbtn-view {
+  background: #1c1d22; color: #a1a1aa;
+  border: 1px solid rgba(255,255,255,0.09);
+}
+.nxdb-mbtn-view:hover {
+  background: #252630; color: #fff;
+  border-color: rgba(255,255,255,0.2);
+}
+.nxdb-mbtn-add {
+  background: rgba(139,92,246,0.12); color: #c4b5fd;
+  border: 1px solid rgba(139,92,246,0.3);
+}
+.nxdb-mbtn-add:hover {
+  background: #8b5cf6; color: #fff;
+  border-color: #8b5cf6;
+  box-shadow: 0 2px 10px rgba(139,92,246,0.4);
+}
+
+/* ── Right Sidebar ────────────────────────────────────────────── */
+.nxdb-sidebar { display: flex; flex-direction: column; gap: 20px; }
+.nxdb-card {
+  background: #141518;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+}
+.nxdb-card-hdr {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 18px;
+  background: #101114;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.nxdb-card-hdr .material-symbols-outlined { font-size: 17px !important; color: #8b5cf6; }
+.nxdb-card-hdr h3 { font-size: 13.5px; font-weight: 700; color: #f4f4f5; margin: 0; letter-spacing: -0.01em; }
+.nxdb-card-body { padding: 14px 18px; }
+
+/* Activity Feed */
+.nxdb-feed { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
+.nxdb-feed-item { display: flex; align-items: flex-start; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.nxdb-feed-item:last-child { padding-bottom: 0; border-bottom: none; }
+.nxdb-feed-ico {
+  width: 28px; height: 28px; min-width: 28px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.nxdb-feed-ico .material-symbols-outlined { font-size: 13px !important; }
+.nxdb-ico-add { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+.nxdb-ico-chg { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+.nxdb-ico-del { background: rgba(244,63,94,0.15);  color: #fb7185; border: 1px solid rgba(244,63,94,0.3);  }
+.nxdb-feed-body { flex: 1; min-width: 0; }
+.nxdb-feed-name {
+  font-size: 13px; font-weight: 500; color: #e4e4e7;
+  display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+a.nxdb-feed-name:hover { color: #a78bfa; text-decoration: underline; }
+.nxdb-feed-meta { font-size: 11px; color: #52525b; margin-top: 3px; display: flex; gap: 8px; }
+.nxdb-empty {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 28px; color: #52525b; gap: 8px; text-align: center;
+}
+.nxdb-empty .material-symbols-outlined { font-size: 30px !important; }
+.nxdb-empty p { font-size: 12.5px; margin: 0; }
+.nxdb-card-ftr {
+  padding: 11px 18px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  background: #101114;
+}
+.nxdb-ftr-link {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12px; font-weight: 600; color: #8b5cf6;
+  transition: color 0.15s;
+}
+.nxdb-ftr-link:hover { color: #c4b5fd; }
+.nxdb-ftr-link .material-symbols-outlined { font-size: 14px !important; }
+
+/* Quick Actions Grid */
+.nxdb-qa {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.nxdb-qa-btn {
+  display: flex; align-items: center; gap: 9px;
+  padding: 11px 13px; border-radius: 9px;
+  background: #1c1d22;
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #a1a1aa;
+  font-size: 12.5px; font-weight: 500;
+  transition: all 0.15s ease; cursor: pointer;
+}
+.nxdb-qa-btn .material-symbols-outlined { font-size: 17px !important; color: #8b5cf6; }
+.nxdb-qa-btn:hover {
+  background: #252630; color: #fff;
+  border-color: rgba(139,92,246,0.3);
+  transform: translateY(-1px);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="nxdb">
+
+  <!-- ══ Header ═══════════════════════════════════════════════ -->
+  <div class="nxdb-hdr">
+    <div class="nxdb-hdr-title">
+      <div class="nxdb-hdr-icon">
+        <span class="material-symbols-outlined">dashboard</span>
+      </div>
+      <div>
+        <h1 class="nxdb-h1">Site Administration</h1>
+        <p class="nxdb-sub">NEXORA Enterprise Operations &amp; Intelligence</p>
+      </div>
+    </div>
+    <div class="nxdb-actions">
+      <a href="{% url 'admin:nexora_api_customer_add' %}" class="nxdb-btn nxdb-btn-primary">
+        <span class="material-symbols-outlined">add</span> New Customer
+      </a>
+      <a href="{% url 'admin:nexora_api_employee_add' %}" class="nxdb-btn nxdb-btn-ghost">
+        <span class="material-symbols-outlined">person_add</span> New Employee
+      </a>
+    </div>
+  </div>
+
+  <!-- ══ Stats ═════════════════════════════════════════════════ -->
+  <div class="nxdb-stats">
+    <a href="{% url 'admin:nexora_accounts_user_changelist' %}" class="nxdb-stat nxdb-stat-v">
+      <div class="nxdb-stat-ico"><span class="material-symbols-outlined">group</span></div>
+      <div class="nxdb-stat-body">
+        <div class="nxdb-stat-lbl">System Users</div>
+        <div class="nxdb-stat-val">Users</div>
+        <div class="nxdb-stat-hint">All registered accounts</div>
+      </div>
+      <span class="material-symbols-outlined nxdb-stat-arr">arrow_forward</span>
+    </a>
+    <a href="{% url 'admin:nexora_api_customer_changelist' %}" class="nxdb-stat nxdb-stat-g">
+      <div class="nxdb-stat-ico"><span class="material-symbols-outlined">storefront</span></div>
+      <div class="nxdb-stat-body">
+        <div class="nxdb-stat-lbl">Customers</div>
+        <div class="nxdb-stat-val">Accounts</div>
+        <div class="nxdb-stat-hint">Client organizations</div>
+      </div>
+      <span class="material-symbols-outlined nxdb-stat-arr">arrow_forward</span>
+    </a>
+    <a href="{% url 'admin:nexora_api_employee_changelist' %}" class="nxdb-stat nxdb-stat-a">
+      <div class="nxdb-stat-ico"><span class="material-symbols-outlined">badge</span></div>
+      <div class="nxdb-stat-body">
+        <div class="nxdb-stat-lbl">Employees</div>
+        <div class="nxdb-stat-val">Team</div>
+        <div class="nxdb-stat-hint">Active team members</div>
+      </div>
+      <span class="material-symbols-outlined nxdb-stat-arr">arrow_forward</span>
+    </a>
+    <a href="{% url 'admin:nexora_api_department_changelist' %}" class="nxdb-stat nxdb-stat-r">
+      <div class="nxdb-stat-ico"><span class="material-symbols-outlined">domain</span></div>
+      <div class="nxdb-stat-body">
+        <div class="nxdb-stat-lbl">Departments</div>
+        <div class="nxdb-stat-val">Units</div>
+        <div class="nxdb-stat-hint">Organizational units</div>
+      </div>
+      <span class="material-symbols-outlined nxdb-stat-arr">arrow_forward</span>
+    </a>
+  </div>
+
+  <!-- ══ Main 2-column ═════════════════════════════════════════ -->
+  <div class="nxdb-grid">
+
+    <!-- Left: App Model Cards -->
+    <div class="nxdb-apps">
+      {% for app in app_list %}
+      <div class="nxdb-app-card">
+        <div class="nxdb-app-hdr">
+          <div class="nxdb-app-ico">
+            {% if app.app_label == "nexora_accounts" %}<span class="material-symbols-outlined">manage_accounts</span>
+            {% elif app.app_label == "nexora_api" %}<span class="material-symbols-outlined">hub</span>
+            {% elif app.app_label == "auth" %}<span class="material-symbols-outlined">security</span>
+            {% elif app.app_label == "token_blacklist" %}<span class="material-symbols-outlined">key_off</span>
+            {% else %}<span class="material-symbols-outlined">apps</span>{% endif %}
+          </div>
+          <div>
+            <p class="nxdb-app-name">{{ app.name }}</p>
+            <p class="nxdb-app-count">{{ app.models|length }} model{{ app.models|length|pluralize }}</p>
+          </div>
+        </div>
+        {% for model in app.models %}
+        <div class="nxdb-model-row">
+          <div class="nxdb-model-left">
+            <div class="nxdb-dot"></div>
+            <span class="nxdb-model-name">{{ model.name }}</span>
+          </div>
+          <div class="nxdb-model-btns">
+            {% if model.admin_url %}
+            <a href="{{ model.admin_url }}" class="nxdb-mbtn nxdb-mbtn-view">
+              <span class="material-symbols-outlined">list</span> View
+            </a>
+            {% endif %}
+            {% if model.add_url %}
+            <a href="{{ model.add_url }}" class="nxdb-mbtn nxdb-mbtn-add">
+              <span class="material-symbols-outlined">add</span> Add
+            </a>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% empty %}
+      <div class="nxdb-empty">
+        <span class="material-symbols-outlined">inbox</span>
+        <p>No applications registered.</p>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Right: Sidebar panels -->
+    <div class="nxdb-sidebar">
+
+      <!-- Recent Actions -->
+      <div class="nxdb-card">
+        <div class="nxdb-card-hdr">
+          <span class="material-symbols-outlined">history</span>
+          <h3>Recent Actions</h3>
+        </div>
+        <div class="nxdb-card-body">
+          {% if log_entries %}
+          <ul class="nxdb-feed">
+            {% for entry in log_entries|slice:":8" %}
+            <li class="nxdb-feed-item">
+              <div class="nxdb-feed-ico {% if entry.is_addition %}nxdb-ico-add{% elif entry.is_change %}nxdb-ico-chg{% else %}nxdb-ico-del{% endif %}">
+                <span class="material-symbols-outlined">{% if entry.is_addition %}add{% elif entry.is_change %}edit{% else %}delete{% endif %}</span>
+              </div>
+              <div class="nxdb-feed-body">
+                {% if entry.is_deletion or not entry.get_admin_url %}
+                  <span class="nxdb-feed-name">{{ entry.object_repr }}</span>
+                {% else %}
+                  <a href="{{ entry.get_admin_url }}" class="nxdb-feed-name">{{ entry.object_repr }}</a>
+                {% endif %}
+                <div class="nxdb-feed-meta">
+                  <span>{{ entry.content_type.name|capfirst }}</span>
+                  <span>{{ entry.action_time|date:"M d, H:i" }}</span>
+                </div>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <div class="nxdb-empty">
+            <span class="material-symbols-outlined">pending_actions</span>
+            <p>No actions recorded yet</p>
+          </div>
+          {% endif %}
+        </div>
+        <div class="nxdb-card-ftr">
+          <a href="{% url 'admin:index' %}" class="nxdb-ftr-link">
+            View audit log <span class="material-symbols-outlined">arrow_forward</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="nxdb-card">
+        <div class="nxdb-card-hdr">
+          <span class="material-symbols-outlined">bolt</span>
+          <h3>Quick Actions</h3>
+        </div>
+        <div class="nxdb-card-body">
+          <div class="nxdb-qa">
+            <a href="{% url 'admin:nexora_accounts_user_add' %}" class="nxdb-qa-btn">
+              <span class="material-symbols-outlined">person_add</span><span>Add User</span>
+            </a>
+            <a href="{% url 'admin:nexora_api_customer_add' %}" class="nxdb-qa-btn">
+              <span class="material-symbols-outlined">storefront</span><span>Add Customer</span>
+            </a>
+            <a href="{% url 'admin:nexora_api_employee_add' %}" class="nxdb-qa-btn">
+              <span class="material-symbols-outlined">badge</span><span>Add Employee</span>
+            </a>
+            <a href="{% url 'admin:nexora_api_department_add' %}" class="nxdb-qa-btn">
+              <span class="material-symbols-outlined">domain</span><span>Add Dept</span>
+            </a>
+            <a href="{% url 'admin:nexora_accounts_user_changelist' %}" class="nxdb-qa-btn">
+              <span class="material-symbols-outlined">group</span><span>All Users</span>
+            </a>
+            <a href="{% url 'admin:auth_group_changelist' %}" class="nxdb-qa-btn">
+              <span class="material-symbols-outlined">security</span><span>Groups</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,340 +1,1431 @@
-
-/* NEXORA — Premium Django Admin Styling */
+/* ==========================================================================
+   NEXORA Enterprise Admin Theme
+   Ultra-Modern, Neutral Dark (Zinc/Obsidian) — Zero Blue Backgrounds
+   ========================================================================== */
 
 :root {
-  --nx-bg: #080d1b;
-  --nx-panel: #10182b;
-  --nx-panel-hover: #17223a;
-  --nx-border: #26344f;
-  --nx-text: #edf2ff;
-  --nx-muted: #91a0bf;
-  --nx-purple: #8b5cf6;
-  --nx-radius: 12px;
+  color-scheme: dark;
+
+  /* Surfaces & Backgrounds (Neutral Zinc/Obsidian, 0% Blue Hue) */
+  --nx-bg: #09090b;
+  --nx-sidebar: #0e0f12;
+  --nx-surface: #141518;
+  --nx-surface-header: #101114;
+  --nx-surface-elevated: #1a1b20;
+  --nx-surface-hover: #1e1f25;
+  --nx-surface-active: rgba(139, 92, 246, 0.12);
+
+  /* Borders & Dividers */
+  --nx-border: rgba(255, 255, 255, 0.08);
+  --nx-border-subtle: rgba(255, 255, 255, 0.04);
+  --nx-border-hover: rgba(255, 255, 255, 0.15);
+  --nx-border-focus: #8b5cf6;
+
+  /* Typography */
+  --nx-text-primary: #f4f4f5;
+  --nx-text-secondary: #a1a1aa;
+  --nx-text-muted: #71717a;
+
+  /* Accent & Status */
+  --nx-accent: #8b5cf6;
+  --nx-accent-hover: #7c3aed;
+  --nx-accent-soft: rgba(139, 92, 246, 0.15);
+  --nx-accent-border: rgba(139, 92, 246, 0.3);
+
+  --nx-success: #10b981;
+  --nx-success-soft: rgba(16, 185, 129, 0.12);
+  --nx-success-text: #34d399;
+
+  --nx-danger: #f43f5e;
+  --nx-danger-soft: rgba(244, 63, 94, 0.12);
+  --nx-danger-text: #fb7185;
+
+  /* Radii */
+  --nx-radius-sm: 6px;
+  --nx-radius: 10px;
+  --nx-radius-lg: 14px;
 }
 
-/* Consistent typography */
-body,
-button,
-input,
-select,
-textarea {
-  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+/* --------------------------------------------------------------------------
+   Material Symbols Icons (Preserve font-family across all elements)
+   -------------------------------------------------------------------------- */
+.material-symbols-outlined {
+  font-family: "Material Symbols Outlined" !important;
+  font-weight: normal !important;
+  font-style: normal !important;
+  font-size: 20px !important;
+  line-height: 1 !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+  display: inline-block !important;
+  white-space: nowrap !important;
+  word-wrap: normal !important;
+  direction: ltr !important;
+  -webkit-font-feature-settings: 'liga' !important;
+  -webkit-font-smoothing: antialiased !important;
+  vertical-align: middle !important;
 }
 
-/* Content area */
-#content,
+/* --------------------------------------------------------------------------
+   Global Typography & Smooth Scrolling
+   -------------------------------------------------------------------------- */
+html,
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif !important;
+  background-color: var(--nx-bg) !important;
+  color: var(--nx-text-primary) !important;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* --------------------------------------------------------------------------
+   Unfold Dark Mode Core Color Overrides (Eliminate all blue/navy tints)
+   -------------------------------------------------------------------------- */
+.dark,
+.dark body,
+html.dark {
+  background-color: var(--nx-bg) !important;
+  color: var(--nx-text-primary) !important;
+}
+
+.dark .dark\:bg-base-950 {
+  background-color: var(--nx-bg) !important;
+}
+
+.dark .dark\:bg-base-900 {
+  background-color: var(--nx-surface) !important;
+}
+
+.dark .dark\:bg-base-800 {
+  background-color: var(--nx-surface-header) !important;
+}
+
+.dark .dark\:border-base-800,
+.dark .dark\:border-base-700 {
+  border-color: var(--nx-border) !important;
+}
+
+.dark .dark\:text-font-default-dark {
+  color: var(--nx-text-secondary) !important;
+}
+
+.dark .dark\:text-font-important-dark {
+  color: var(--nx-text-primary) !important;
+}
+
+.dark .dark\:text-font-subtle-dark {
+  color: var(--nx-text-muted) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Custom Sleek Minimal Scrollbar
+   -------------------------------------------------------------------------- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #27272a transparent;
+}
+
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
+
+/* --------------------------------------------------------------------------
+   Sidebar (Left Navigation)
+   -------------------------------------------------------------------------- */
+aside,
+nav[aria-label="Sidebar"],
+.sidebar {
+  background-color: var(--nx-sidebar) !important;
+  border-right: 1px solid var(--nx-border) !important;
+}
+
+/* Sidebar Brand Header */
+aside header,
+nav[aria-label="Sidebar"] > div:first-child {
+  border-bottom: 1px solid var(--nx-border) !important;
+}
+
+aside header a,
+nav[aria-label="Sidebar"] a {
+  transition: all 0.15s ease-in-out;
+}
+
+/* App Category Section Headers */
+aside h6,
+aside [class*="tracking-widest"],
+aside [class*="uppercase"] {
+  font-size: 11px !important;
+  font-weight: 650 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  color: var(--nx-text-muted) !important;
+  margin-top: 18px !important;
+  margin-bottom: 6px !important;
+  padding-left: 10px !important;
+}
+
+/* Navigation Links */
+aside nav a,
+aside ul li a {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 8px 12px !important;
+  border-radius: 8px !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  color: var(--nx-text-secondary) !important;
+  transition: all 0.15s ease !important;
+}
+
+aside nav a:hover,
+aside ul li a:hover {
+  background: rgba(255, 255, 255, 0.04) !important;
+  color: #ffffff !important;
+}
+
+/* Active Nav Item */
+aside nav a[class*="bg-primary"],
+aside nav a[aria-current="page"],
+aside ul li a.active,
+aside ul li a[class*="bg-primary"] {
+  background: var(--nx-accent-soft) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  box-shadow: inset 3px 0 0 var(--nx-accent) !important;
+}
+
+/* User Profile Pill at Bottom */
+aside footer,
+aside [class*="mt-auto"] {
+  border-top: 1px solid var(--nx-border) !important;
+  background-color: var(--nx-sidebar) !important;
+  padding: 12px 14px !important;
+}
+
+aside footer a,
+aside [class*="mt-auto"] a {
+  border-radius: 8px !important;
+}
+
+aside footer a:hover,
+aside [class*="mt-auto"] a:hover {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Breadcrumbs & Top Bar
+   -------------------------------------------------------------------------- */
+div.breadcrumbs,
+[aria-label="Breadcrumb"] {
+  background: transparent !important;
+  border-bottom: 1px solid var(--nx-border) !important;
+  padding: 14px 28px !important;
+  font-size: 13px !important;
+  color: var(--nx-text-muted) !important;
+}
+
+div.breadcrumbs a,
+[aria-label="Breadcrumb"] a {
+  color: var(--nx-text-secondary) !important;
+  text-decoration: none !important;
+  font-weight: 500 !important;
+  transition: color 0.15s ease !important;
+}
+
+div.breadcrumbs a:hover,
+[aria-label="Breadcrumb"] a:hover {
+  color: #ffffff !important;
+}
+
+div.breadcrumbs span,
+[aria-label="Breadcrumb"] span {
+  color: var(--nx-text-primary) !important;
+  font-weight: 600 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Proper Buttons: Primary + Add Object Button
+   -------------------------------------------------------------------------- */
+a[href$="/add/"],
+.addlink {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  font-size: 13.5px !important;
+  padding: 8px 18px !important;
+  border-radius: 8px !important;
+  border: 1px solid rgba(139, 92, 246, 0.5) !important;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3) !important;
+  text-decoration: none !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: 38px !important;
+  transition: all 0.15s ease !important;
+  cursor: pointer !important;
+}
+
+a[href$="/add/"]:hover,
+.addlink:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%) !important;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.45) !important;
+  transform: translateY(-1px) !important;
+}
+
+a[href$="/add/"] .material-symbols-outlined,
+.addlink .material-symbols-outlined {
+  font-size: 18px !important;
+  color: #ffffff !important;
+}
+
+/* --------------------------------------------------------------------------
+   Search Bar & Filter Toolbar
+   -------------------------------------------------------------------------- */
+#toolbar,
+#changelist-search,
+form[method="get"] {
+  background: transparent !important;
+}
+
+#searchbar,
+input[name="q"],
+input[placeholder*="search" i] {
+  background: var(--nx-surface) !important;
+  border: 1px solid var(--nx-border) !important;
+  border-radius: 8px !important;
+  color: var(--nx-text-primary) !important;
+  font-size: 13.5px !important;
+  padding: 9px 14px 9px 38px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+  transition: all 0.2s ease !important;
+}
+
+#searchbar:focus,
+input[name="q"]:focus,
+input[placeholder*="search" i]:focus {
+  outline: none !important;
+  border-color: var(--nx-accent) !important;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.18) !important;
+}
+
+/* Filter Button */
+.filter-open-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  background: var(--nx-surface) !important;
+  border: 1px solid var(--nx-border) !important;
+  border-radius: 8px !important;
+  color: var(--nx-text-secondary) !important;
+  font-size: 13px !important;
+  font-weight: 550 !important;
+  padding: 8px 14px !important;
+  transition: all 0.15s ease !important;
+  cursor: pointer !important;
+}
+
+.filter-open-button:hover {
+  background: var(--nx-surface-hover) !important;
+  color: #ffffff !important;
+  border-color: var(--nx-border-hover) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Changelist Table & Enclosing Card
+   -------------------------------------------------------------------------- */
+#changelist {
+  background: transparent !important;
+  min-width: 0 !important;
+}
+
+/* Enclosing Card Container for Table */
+div:has(> table#result_list),
+.results,
+#changelist .results {
+  background: var(--nx-surface) !important;
+  border: 1px solid var(--nx-border) !important;
+  border-radius: var(--nx-radius-lg) !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35) !important;
+  margin-top: 14px !important;
+}
+
+table#result_list,
+#changelist table {
+  width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+
+/* Table Header */
+table#result_list thead tr,
+#changelist table thead tr {
+  background: var(--nx-surface-header) !important;
+  border-bottom: 1px solid var(--nx-border) !important;
+}
+
+table#result_list thead th,
+#changelist table thead th {
+  padding: 14px 18px !important;
+  font-size: 11.5px !important;
+  font-weight: 650 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  color: var(--nx-text-secondary) !important;
+  white-space: nowrap !important;
+  border-bottom: 1px solid var(--nx-border) !important;
+}
+
+table#result_list thead th a,
+#changelist table thead th a {
+  color: var(--nx-text-secondary) !important;
+  text-decoration: none !important;
+}
+
+table#result_list thead th a:hover,
+#changelist table thead th a:hover {
+  color: #ffffff !important;
+}
+
+/* Table Sort Options */
+.sortoptions {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  margin-left: 6px !important;
+}
+
+.sortoptions a {
+  color: var(--nx-text-muted) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.sortoptions a:hover {
+  color: var(--nx-accent) !important;
+}
+
+.sortoptions a.sortremove:hover {
+  color: var(--nx-danger-text) !important;
+}
+
+.sortoptions .material-symbols-outlined {
+  font-size: 16px !important;
+}
+
+/* Table Body Rows */
+table#result_list tbody tr,
+#changelist table tbody tr {
+  background: transparent !important;
+  border-bottom: 1px solid var(--nx-border-subtle) !important;
+  transition: background 0.15s ease-in-out !important;
+}
+
+table#result_list tbody tr:hover,
+#changelist table tbody tr:hover {
+  background: var(--nx-surface-hover) !important;
+}
+
+table#result_list tbody tr.selected,
+#changelist table tbody tr.selected {
+  background: var(--nx-surface-active) !important;
+}
+
+table#result_list tbody td,
+#changelist table tbody td {
+  padding: 14px 18px !important;
+  font-size: 13.5px !important;
+  color: #e4e4e7 !important;
+  vertical-align: middle !important;
+  border-bottom: 1px solid var(--nx-border-subtle) !important;
+}
+
+/* Primary Cell Link */
+table#result_list tbody th a,
+table#result_list tbody td:first-child a,
+#changelist table tbody td a[class*="font-semibold"] {
+  color: #ffffff !important;
+  font-weight: 550 !important;
+  text-decoration: none !important;
+}
+
+table#result_list tbody th a:hover,
+#changelist table tbody td a[class*="font-semibold"]:hover {
+  color: var(--nx-accent) !important;
+  text-decoration: underline !important;
+}
+
+/* Table Checkboxes */
+input[type="checkbox"] {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  width: 17px !important;
+  height: 17px !important;
+  background-color: #121316 !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 5px !important;
+  cursor: pointer !important;
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.15s ease !important;
+}
+
+input[type="checkbox"]:checked {
+  background-color: var(--nx-accent) !important;
+  border-color: var(--nx-accent) !important;
+}
+
+input[type="checkbox"]:checked::after {
+  content: "" !important;
+  width: 5px !important;
+  height: 9px !important;
+  border: solid #ffffff !important;
+  border-width: 0 2px 2px 0 !important;
+  transform: rotate(45deg) translate(-1px, -1px) !important;
+  display: block !important;
+}
+
+/* Modern Status Icons (is_active) */
+#changelist td .material-symbols-outlined[class*="text-green"],
+#changelist td svg[class*="text-green"],
+#changelist td span[class*="text-green"] {
+  color: var(--nx-success-text) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Floating Bulk Action Toolbar
+   -------------------------------------------------------------------------- */
+#changelist-actions-wrapper,
+#changelist-actions {
+  background: #18191e !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
+}
+
+#changelist-actions .group.primary {
+  align-items: center !important;
+}
+
+#changelist-actions select {
+  background: #101114 !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  border-radius: 7px !important;
+  color: #f4f4f5 !important;
+  font-size: 13px !important;
+  padding: 6px 14px !important;
+}
+
+#changelist-actions button[type="submit"] {
+  background: var(--nx-accent) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  padding: 7px 16px !important;
+  border-radius: 7px !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+#changelist-actions button[type="submit"]:hover {
+  background: var(--nx-accent-hover) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Side Pages: Detail / Edit / Add (ChangeForm)
+   -------------------------------------------------------------------------- */
 #content-main {
-  min-width: 0;
+  max-width: 1300px;
 }
 
-#content {
-  padding: 28px clamp(16px, 3vw, 42px);
-}
-
-#content h1 {
-  font-size: clamp(24px, 2.5vw, 32px);
-  font-weight: 750;
-  letter-spacing: -0.7px;
-  margin-bottom: 24px;
-}
-
-/* Form sections */
+/* Form Modules & Fieldsets */
 fieldset,
 .module,
-.inline-group,
-.submit-row {
-  border-radius: var(--nx-radius);
-  overflow: hidden;
-}
-
-fieldset {
-  margin-bottom: 22px;
+.inline-group {
+  background: var(--nx-surface) !important;
+  border: 1px solid var(--nx-border) !important;
+  border-radius: var(--nx-radius-lg) !important;
+  padding: 24px !important;
+  margin-bottom: 24px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
 }
 
 fieldset h2,
 .module h2,
 .inline-group h2 {
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.15px;
+  font-size: 15px !important;
+  font-weight: 650 !important;
+  letter-spacing: -0.01em !important;
+  color: #ffffff !important;
+  padding-bottom: 12px !important;
+  margin-bottom: 20px !important;
+  border-bottom: 1px solid var(--nx-border) !important;
+  background: transparent !important;
 }
 
-/* Field labels */
+/* Field Rows & Labels */
+.form-row {
+  padding: 12px 0 !important;
+  border-bottom: 1px solid var(--nx-border-subtle) !important;
+}
+
+.form-row:last-child {
+  border-bottom: none !important;
+}
+
 .form-row label,
 .aligned label,
 label {
-  font-weight: 600;
-  line-height: 1.6;
+  font-size: 13px !important;
+  font-weight: 550 !important;
+  color: #d4d4d8 !important;
+  margin-bottom: 6px !important;
+  display: block !important;
 }
 
 .help,
 .helptext,
 p.help {
-  color: var(--nx-muted);
-  font-size: 12px;
-  line-height: 1.65;
+  color: var(--nx-text-muted) !important;
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+  margin-top: 5px !important;
 }
 
-/* Inputs, selects and textareas */
+/* Form Inputs, Selects, Textareas */
 input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="hidden"]),
 select,
 textarea {
-  width: 100%;
-  max-width: 100%;
-  min-height: 42px;
-  padding: 10px 12px;
-  border: 1px solid var(--nx-border);
-  border-radius: 9px;
-  box-sizing: border-box;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  background-color: #0d0e11 !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 8px !important;
+  color: #f4f4f5 !important;
+  font-size: 13.5px !important;
+  padding: 10px 14px !important;
+  width: 100% !important;
+  max-width: 640px !important;
+  box-sizing: border-box !important;
+  transition: border-color 0.15s, box-shadow 0.15s !important;
 }
 
 textarea {
-  min-height: 120px;
-  resize: vertical;
+  min-height: 110px !important;
 }
 
 input:focus,
 select:focus,
 textarea:focus {
-  outline: none;
-  border-color: var(--nx-purple);
-  box-shadow: 0 0 0 3px rgb(139 92 246 / 16%);
+  outline: none !important;
+  border-color: var(--nx-accent) !important;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2) !important;
 }
 
-/* Improve form row spacing */
-.form-row,
-.aligned .form-row {
-  padding-top: 15px;
-  padding-bottom: 15px;
+/* Native Select options */
+select,
+select option,
+select optgroup {
+  background-color: #141518 !important;
+  color: #f4f4f5 !important;
 }
 
-.form-row > div,
-.form-row .flex-container {
-  min-width: 0;
-}
-
-/* Checkboxes and radio controls keep their natural size */
-input[type="checkbox"],
-input[type="radio"] {
-  accent-color: var(--nx-purple);
-}
-
-/* Buttons */
-.submit-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 18px;
-  margin-top: 20px;
-}
-
-.submit-row input,
-.button,
-input[type="submit"],
-input[type="button"],
-button {
-  border-radius: 9px;
-  font-weight: 650;
-  transition: filter 0.2s, transform 0.2s;
-}
-
-.submit-row input:hover,
-.button:hover,
-input[type="submit"]:hover,
-button:hover {
-  filter: brightness(1.1);
-}
-
-/* Tables and changelist pages */
-#changelist,
-#changelist-filter,
-#changelist-form,
-.results {
-  min-width: 0;
-  border-radius: var(--nx-radius);
-}
-
-#changelist table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-}
-
-#changelist table th,
-#changelist table td {
-  padding: 13px 15px;
-  vertical-align: middle;
-}
-
-#changelist table tbody tr:hover {
-  background: rgb(139 92 246 / 5%);
-}
-
-/* Breadcrumbs */
-div.breadcrumbs {
-  padding: 14px 24px;
-  line-height: 1.6;
-}
-
-/* Related-object links */
-.related-widget-wrapper {
-  max-width: 100%;
-  min-width: 0;
-}
-
-.related-widget-wrapper select {
-  max-width: 100%;
-}
-
-/* Error messages */
-.errorlist {
-  padding: 12px 16px;
-  border-radius: 9px;
-  line-height: 1.7;
-}
-
-/* Responsive layouts */
-@media (min-width: 1200px) {
-  #content {
-    max-width: 1800px;
-    margin-inline: auto;
-  }
-}
-
-@media (max-width: 767px) {
-  #content {
-    padding: 18px 12px;
-  }
-
-  .form-row,
-  .aligned .form-row {
-    padding: 12px;
-  }
-
-  .submit-row {
-    gap: 8px;
-    padding: 12px;
-  }
-
-  #changelist {
-    overflow-x: auto;
-  }
-
-  #changelist table {
-    min-width: 650px;
-  }
-}
-
-/* Fix Unfold form and permission selector layout */
-.aligned .form-row {
-  display: block;
-  padding: 14px 18px;
-}
-
-.aligned .form-row label {
-  display: inline-block;
-  padding-top: 0;
-  margin-bottom: 8px;
-}
-
-.aligned .form-row > div,
-.aligned .form-row .flex-container {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-}
-
-.aligned .form-row input:not([type="checkbox"]):not([type="radio"]),
-.aligned .form-row select,
-.aligned .form-row textarea {
-  width: 100%;
-  max-width: 100%;
-}
-
+/* Multi-select Permissions Selector */
 .selector {
-  display: flex;
-  align-items: stretch;
-  gap: 12px;
-  width: 100%;
-  max-width: 100%;
+  display: flex !important;
+  gap: 16px !important;
+  max-width: 800px !important;
+  width: 100% !important;
 }
 
 .selector-available,
 .selector-chosen {
-  flex: 1 1 0;
-  width: auto;
-  min-width: 0;
+  flex: 1 1 0% !important;
+  background: #0d0e11 !important;
+  border: 1px solid var(--nx-border) !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+}
+
+.selector-available h2,
+.selector-chosen h2 {
+  font-size: 12px !important;
+  font-weight: 650 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  color: var(--nx-text-muted) !important;
+  padding: 10px 14px !important;
+  background: var(--nx-surface-header) !important;
+  border-bottom: 1px solid var(--nx-border) !important;
+  margin: 0 !important;
 }
 
 .selector select {
-  width: 100%;
-  min-width: 0;
-  min-height: 180px;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  min-height: 220px !important;
+  max-width: 100% !important;
 }
 
 .selector .selector-chooser {
-  flex: 0 0 30px;
-  width: 30px;
+  align-self: center !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+.selector .selector-chooser a {
+  background: var(--nx-surface-header) !important;
+  border: 1px solid var(--nx-border) !important;
+  border-radius: 6px !important;
+  padding: 6px 10px !important;
+  color: #ffffff !important;
+  transition: all 0.15s !important;
+}
+
+.selector .selector-chooser a:hover {
+  background: var(--nx-surface-hover) !important;
+  border-color: var(--nx-border-hover) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Submit Row / Proper Action Buttons (Bottom Bar)
+   -------------------------------------------------------------------------- */
+.submit-row {
+  background: var(--nx-surface-header) !important;
+  border: 1px solid var(--nx-border) !important;
+  border-radius: var(--nx-radius-lg) !important;
+  padding: 16px 22px !important;
+  margin-top: 28px !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 12px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Primary Action (Save) */
+.submit-row input[type="submit"][name="_save"],
+.submit-row input[value="Save"],
+input.default,
+.button.default {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  padding: 10px 24px !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.35) !important;
+  transition: all 0.15s ease !important;
+}
+
+.submit-row input[type="submit"][name="_save"]:hover,
+.submit-row input[value="Save"]:hover,
+input.default:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.5) !important;
+}
+
+/* Secondary Actions (Save and continue, Save and add another) */
+.submit-row input[type="submit"]:not(.default),
+.submit-row input[type="button"],
+.button {
+  background: #1c1d22 !important;
+  color: #d4d4d8 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  padding: 10px 18px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.submit-row input[type="submit"]:not(.default):hover,
+.submit-row input[type="button"]:hover,
+.button:hover {
+  background: #25262e !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Delete Action */
+.submit-row a.deletelink,
+a.deletelink {
+  background: var(--nx-danger-soft) !important;
+  color: var(--nx-danger-text) !important;
+  border: 1px solid rgba(244, 63, 94, 0.25) !important;
+  border-radius: 8px !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  padding: 10px 18px !important;
+  text-decoration: none !important;
+  margin-left: auto !important;
+  transition: all 0.15s ease !important;
+}
+
+.submit-row a.deletelink:hover,
+a.deletelink:hover {
+  background: rgba(244, 63, 94, 0.2) !important;
+  color: #ffffff !important;
+}
+
+/* --------------------------------------------------------------------------
+   Messages, Alerts & Badges
+   -------------------------------------------------------------------------- */
+ul.messagelist li {
+  border-radius: 8px !important;
+  padding: 12px 18px !important;
+  font-size: 13.5px !important;
+  margin-bottom: 14px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+}
+
+ul.messagelist li.success {
+  background: var(--nx-success-soft) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.25) !important;
+}
+
+ul.messagelist li.error {
+  background: var(--nx-danger-soft) !important;
+  color: #fb7185 !important;
+  border: 1px solid rgba(244, 63, 94, 0.25) !important;
+}
+
+
+/* ==========================================================================
+   NEXORA Admin Command Center / Modern Dashboard Styles
+   Zero Blue Backgrounds — Dark Zinc/Obsidian & Violet Accent
+   ========================================================================== */
+
+.nx-dashboard {
+  padding: 24px 32px 48px;
+  max-width: 1540px;
+  margin: 0 auto;
+  color: var(--nx-text-primary);
+}
+
+/* ── Dashboard Header ─────────────────────────────────────────────────── */
+.nx-dash-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--nx-border);
+  margin-bottom: 28px;
+}
+
+.nx-dash-title {
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  letter-spacing: -0.02em !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin: 0 0 6px 0 !important;
+}
+
+.nx-dash-title .material-symbols-outlined {
+  font-size: 28px !important;
+  color: var(--nx-accent) !important;
+  background: var(--nx-accent-soft) !important;
+  padding: 8px !important;
+  border-radius: 10px !important;
+  border: 1px solid var(--nx-accent-border) !important;
+}
+
+.nx-dash-subtitle {
+  color: var(--nx-text-muted) !important;
+  font-size: 13.5px !important;
+  margin: 0 !important;
+}
+
+.nx-dash-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ── Generic Buttons ──────────────────────────────────────────────────── */
+.nx-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  padding: 9px 18px !important;
+  border-radius: 8px !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  line-height: 1 !important;
+}
+
+.nx-btn .material-symbols-outlined {
+  font-size: 18px !important;
+}
+
+.nx-btn-primary {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(139, 92, 246, 0.45) !important;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3) !important;
+}
+
+.nx-btn-primary:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%) !important;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.45) !important;
+  transform: translateY(-1px) !important;
+}
+
+.nx-btn-outline {
+  background: var(--nx-surface) !important;
+  color: var(--nx-text-secondary) !important;
+  border: 1px solid var(--nx-border) !important;
+}
+
+.nx-btn-outline:hover {
+  background: var(--nx-surface-hover) !important;
+  color: #ffffff !important;
+  border-color: var(--nx-border-hover) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* ── Stats Metric Cards ──────────────────────────────────────────────── */
+.nx-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.nx-stat-card {
+  background: var(--nx-surface) !important;
+  border: 1px solid var(--nx-border) !important;
+  border-radius: 12px !important;
+  padding: 18px 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  text-decoration: none !important;
+  position: relative !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  overflow: hidden !important;
+}
+
+.nx-stat-card:hover {
+  background: var(--nx-surface-elevated) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35) !important;
+}
+
+.nx-stat-icon {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+}
+
+.nx-stat-icon .material-symbols-outlined {
+  font-size: 22px !important;
+}
+
+.nx-stat-violet .nx-stat-icon {
+  background: rgba(139, 92, 246, 0.14);
+  color: #a78bfa;
+  border-color: rgba(139, 92, 246, 0.28);
+}
+
+.nx-stat-emerald .nx-stat-icon {
+  background: rgba(16, 185, 129, 0.14);
+  color: #34d399;
+  border-color: rgba(16, 185, 129, 0.28);
+}
+
+.nx-stat-amber .nx-stat-icon {
+  background: rgba(245, 158, 11, 0.14);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.28);
+}
+
+.nx-stat-rose .nx-stat-icon {
+  background: rgba(244, 63, 94, 0.14);
+  color: #fb7185;
+  border-color: rgba(244, 63, 94, 0.28);
+}
+
+.nx-stat-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.nx-stat-label {
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  color: var(--nx-text-muted) !important;
+}
+
+.nx-stat-value {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+}
+
+.nx-stat-arrow {
+  color: var(--nx-text-muted) !important;
+  font-size: 18px !important;
+  transition: transform 0.2s ease, color 0.2s ease !important;
+}
+
+.nx-stat-card:hover .nx-stat-arrow {
+  transform: translateX(3px) !important;
+  color: #ffffff !important;
+}
+
+/* ── Main Layout: 2 Columns ───────────────────────────────────────────── */
+.nx-main-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 28px;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .nx-main-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Model App Cards (Left Column) ────────────────────────────────────── */
+.nx-model-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.nx-app-card {
+  background: var(--nx-surface) !important;
+  border: 1px solid var(--nx-border) !important;
+  border-radius: var(--nx-radius-lg) !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+}
+
+.nx-app-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 22px;
+  background: var(--nx-surface-header);
+  border-bottom: 1px solid var(--nx-border);
+}
+
+.nx-app-icon-wrap {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 8px;
+  background: var(--nx-surface-elevated);
+  border: 1px solid var(--nx-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--nx-accent);
+}
+
+.nx-app-icon-wrap .material-symbols-outlined {
+  font-size: 20px !important;
+}
+
+.nx-app-title {
+  font-size: 15px !important;
+  font-weight: 650 !important;
+  color: #ffffff !important;
+  margin: 0 !important;
+  letter-spacing: -0.01em !important;
+}
+
+.nx-app-subtitle {
+  font-size: 11.5px !important;
+  color: var(--nx-text-muted) !important;
+  margin: 2px 0 0 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+.nx-model-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.nx-model-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--nx-border-subtle);
+  transition: background-color 0.15s ease;
+}
+
+.nx-model-row:last-child {
+  border-bottom: none;
+}
+
+.nx-model-row:hover {
+  background: var(--nx-surface-hover);
+}
+
+.nx-model-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nx-model-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #52525b;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.nx-model-row:hover .nx-model-dot {
+  background: var(--nx-accent);
+  transform: scale(1.3);
+}
+
+.nx-model-name {
+  font-size: 14px !important;
+  font-weight: 550 !important;
+  color: #e4e4e7 !important;
+}
+
+.nx-model-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Explicit Model Pill Buttons (View / Add) ─────────────────────────── */
+.nx-model-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  font-size: 12.5px !important;
+  font-weight: 550 !important;
+  padding: 6px 14px !important;
+  border-radius: 6px !important;
+  text-decoration: none !important;
+  transition: all 0.15s ease !important;
+  line-height: 1 !important;
+}
+
+.nx-model-btn .material-symbols-outlined {
+  font-size: 15px !important;
+}
+
+.nx-model-btn-view {
+  background: #1a1b20 !important;
+  color: #d4d4d8 !important;
+  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+}
+
+.nx-model-btn-view:hover {
+  background: #25262e !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+  transform: translateY(-1px) !important;
+}
+
+.nx-model-btn-add {
+  background: rgba(139, 92, 246, 0.12) !important;
+  color: #c4b5fd !important;
+  border: 1px solid rgba(139, 92, 246, 0.32) !important;
+}
+
+.nx-model-btn-add:hover {
+  background: var(--nx-accent) !important;
+  color: #ffffff !important;
+  border-color: var(--nx-accent) !important;
+  box-shadow: 0 2px 10px rgba(139, 92, 246, 0.4) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* ── Sidebar Right Column (Recent Actions & Quick Links) ─────────────── */
+.nx-sidebar-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.nx-panel-card {
+  background: var(--nx-surface) !important;
+  border: 1px solid var(--nx-border) !important;
+  border-radius: var(--nx-radius-lg) !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+}
+
+.nx-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: var(--nx-surface-header);
+  border-bottom: 1px solid var(--nx-border);
+}
+
+.nx-panel-header .material-symbols-outlined {
+  font-size: 18px !important;
+  color: var(--nx-accent) !important;
+}
+
+.nx-panel-header h3 {
+  font-size: 13.5px !important;
+  font-weight: 650 !important;
+  color: #ffffff !important;
+  margin: 0 !important;
+  letter-spacing: -0.01em !important;
+}
+
+.nx-panel-body {
+  padding: 14px 18px;
+}
+
+.nx-panel-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 14px;
+  color: var(--nx-text-muted);
+  gap: 8px;
+  text-align: center;
+}
+
+.nx-panel-empty .material-symbols-outlined {
+  font-size: 28px;
+  color: #52525b;
+}
+
+.nx-panel-empty p {
+  font-size: 12.5px;
   margin: 0;
-  align-self: center;
 }
 
-@media (max-width: 767px) {
-  .selector {
-    flex-wrap: wrap;
-  }
-
-  .selector-available,
-  .selector-chosen {
-    flex: 1 1 100%;
-  }
-
-  .selector .selector-chooser {
-    flex-basis: 100%;
-  }
+.nx-panel-footer {
+  padding: 12px 18px;
+  border-top: 1px solid var(--nx-border);
+  background: var(--nx-surface-header);
 }
 
-
-/* NEXORA — Dark theme for native and enhanced select controls */
-
-select,
-select option,
-select optgroup {
-  background-color: #111a2d;
-  color: #edf2ff;
+.nx-panel-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 550;
+  color: var(--nx-accent);
+  text-decoration: none;
+  transition: color 0.15s ease;
 }
 
-select {
-  border: 1px solid #34415e;
-  border-radius: 9px;
-  color-scheme: dark;
+.nx-panel-link:hover {
+  color: #c4b5fd;
+  text-decoration: underline;
 }
 
-select:focus {
-  outline: none;
-  border-color: #8b5cf6;
-  box-shadow: 0 0 0 3px rgb(139 92 246 / 18%);
+.nx-panel-link .material-symbols-outlined {
+  font-size: 14px !important;
 }
 
-select option {
-  padding: 10px;
+/* ── Activity Feed Items ─────────────────────────────────────────────── */
+.nx-activity-list {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
 }
 
-/* Keep dropdown controls from stretching across the screen */
-.form-row select {
-  max-width: 100%;
+.nx-activity-item {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 12px !important;
+  padding-bottom: 12px !important;
+  border-bottom: 1px solid var(--nx-border-subtle) !important;
 }
 
-/* Improve readability of token labels and related controls */
-.aligned .form-row label {
-  color: #dbe5fa;
+.nx-activity-item:last-child {
+  padding-bottom: 0 !important;
+  border-bottom: none !important;
 }
 
-/* Responsive layout for small screens */
-@media (max-width: 767px) {
-  select {
-    width: 100%;
-    max-width: 100%;
-  }
+.nx-activity-icon {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+
+.nx-activity-icon .material-symbols-outlined {
+  font-size: 14px !important;
+}
+
+.nx-act-add {
+  background: rgba(16, 185, 129, 0.16);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.nx-act-change {
+  background: rgba(245, 158, 11, 0.16);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.nx-act-delete {
+  background: rgba(244, 63, 94, 0.16);
+  color: #fb7185;
+  border: 1px solid rgba(244, 63, 94, 0.3);
+}
+
+.nx-activity-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.nx-activity-name {
+  font-size: 13px !important;
+  font-weight: 550 !important;
+  color: #f4f4f5 !important;
+  text-decoration: none !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nx-activity-name:hover {
+  color: var(--nx-accent) !important;
+  text-decoration: underline !important;
+}
+
+.nx-activity-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--nx-text-muted);
+}
+
+.nx-activity-model {
+  text-transform: capitalize;
+}
+
+.nx-activity-time {
+  color: #71717a;
+  white-space: nowrap;
+}
+
+/* ── Quick Actions Grid ──────────────────────────────────────────────── */
+.nx-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.nx-quick-btn {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 10px 12px !important;
+  border-radius: 8px !important;
+  background: var(--nx-surface-elevated) !important;
+  border: 1px solid var(--nx-border) !important;
+  color: var(--nx-text-secondary) !important;
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+  transition: all 0.15s ease !important;
+}
+
+.nx-quick-btn .material-symbols-outlined {
+  font-size: 17px !important;
+  color: var(--nx-accent) !important;
+}
+
+.nx-quick-btn:hover {
+  background: var(--nx-surface-hover) !important;
+  color: #ffffff !important;
+  border-color: var(--nx-border-hover) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* ── Fallback Styling for Default Unfold Table Rows & Action Buttons ──── */
+table.border-base-200 td:last-child a,
+.app-module table td:last-child a,
+table#result_list td:last-child a {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  padding: 4px 10px !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  font-weight: 550 !important;
+  background: var(--nx-surface-elevated) !important;
+  border: 1px solid var(--nx-border) !important;
+  color: var(--nx-text-secondary) !important;
+  transition: all 0.15s ease !important;
+}
+
+table.border-base-200 td:last-child a:hover,
+.app-module table td:last-child a:hover {
+  background: var(--nx-surface-hover) !important;
+  color: #ffffff !important;
+  border-color: var(--nx-accent) !important;
 }

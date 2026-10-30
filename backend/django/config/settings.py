@@ -66,6 +66,9 @@ INSTALLED_APPS = [
 # ============================================================
 
 
+from django.urls import reverse_lazy
+
+
 UNFOLD = {
     "SITE_TITLE": "NEXORA Administration",
     "SITE_HEADER": "NEXORA",
@@ -73,6 +76,115 @@ UNFOLD = {
     "SITE_SYMBOL": "dashboard",
     "SHOW_HISTORY": True,
     "SHOW_VIEW_ON_SITE": True,
+    "BORDER_RADIUS": "10px",
+
+    "COLORS": {
+        "primary": {
+            "50": "#f5f3ff",
+            "100": "#ede9fe",
+            "200": "#ddd6fe",
+            "300": "#c4b5fd",
+            "400": "#a78bfa",
+            "500": "#8b5cf6",
+            "600": "#7c3aed",
+            "700": "#6d28d9",
+            "800": "#5b21b6",
+            "900": "#4c1d95",
+            "950": "#2e1065",
+        },
+        "base": {
+            "50": "#fafafa",
+            "100": "#f4f4f5",
+            "200": "#e4e4e7",
+            "300": "#d4d4d8",
+            "400": "#a1a1aa",
+            "500": "#71717a",
+            "600": "#52525b",
+            "700": "#3f3f46",
+            "800": "#27272a",
+            "900": "#141518",
+            "950": "#09090b",
+        },
+        "font": {
+            "subtle-light": "var(--color-base-500)",
+            "subtle-dark": "var(--color-base-400)",
+            "default-light": "var(--color-base-600)",
+            "default-dark": "var(--color-base-200)",
+            "important-light": "var(--color-base-900)",
+            "important-dark": "#f4f4f5",
+        },
+    },
+
+    "SIDEBAR": {
+        "show_search": False,
+        "show_all_applications": False,
+        "navigation": [
+            {
+                "title": "Navigation",
+                "separator": False,
+                "items": [
+                    {
+                        "title": "Admin Dashboard",
+                        "icon": "dashboard",
+                        "link": reverse_lazy("admin:index"),
+                    },
+                ],
+            },
+            {
+                "title": "Authentication & Access",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "Users",
+                        "icon": "group",
+                        "link": reverse_lazy("admin:nexora_accounts_user_changelist"),
+                    },
+                    {
+                        "title": "Groups",
+                        "icon": "badge",
+                        "link": reverse_lazy("admin:auth_group_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": "Core Business",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "Customers",
+                        "icon": "storefront",
+                        "link": reverse_lazy("admin:nexora_api_customer_changelist"),
+                    },
+                    {
+                        "title": "Departments",
+                        "icon": "domain",
+                        "link": reverse_lazy("admin:nexora_api_department_changelist"),
+                    },
+                    {
+                        "title": "Employees",
+                        "icon": "person",
+                        "link": reverse_lazy("admin:nexora_api_employee_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": "Security & Tokens",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "Blacklisted Tokens",
+                        "icon": "lock",
+                        "link": reverse_lazy("admin:token_blacklist_blacklistedtoken_changelist"),
+                    },
+                    {
+                        "title": "Outstanding Tokens",
+                        "icon": "key",
+                        "link": reverse_lazy("admin:token_blacklist_outstandingtoken_changelist"),
+                    },
+                ],
+            },
+        ],
+    },
 
     "STYLES": [
         lambda request: "/static/admin/css/nexora-admin.css",
@@ -134,36 +246,46 @@ ASGI_APPLICATION = "config.asgi.application"
 # DATABASE
 # ============================================================
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
+_USE_SQLITE = os.getenv("USE_SQLITE", "False").lower() == "true"
 
-        "NAME": os.getenv(
-            "POSTGRES_DB",
-            "nexora",
-        ),
-
-        "USER": os.getenv(
-            "POSTGRES_USER",
-            "nexora_user",
-        ),
-
-        "PASSWORD": os.getenv(
-            "POSTGRES_PASSWORD",
-            "nexora_password",
-        ),
-
-        "HOST": os.getenv(
-            "POSTGRES_HOST",
-            "localhost",
-        ),
-
-        "PORT": os.getenv(
-            "POSTGRES_PORT",
-            "5432",
-        ),
+if _USE_SQLITE:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+
+            "NAME": os.getenv(
+                "POSTGRES_DB",
+                "nexora",
+            ),
+
+            "USER": os.getenv(
+                "POSTGRES_USER",
+                "nexora_user",
+            ),
+
+            "PASSWORD": os.getenv(
+                "POSTGRES_PASSWORD",
+                "nexora_password",
+            ),
+
+            "HOST": os.getenv(
+                "POSTGRES_HOST",
+                "localhost",
+            ),
+
+            "PORT": os.getenv(
+                "POSTGRES_PORT",
+                "5432",
+            ),
+        }
+    }
 
 
 # ============================================================

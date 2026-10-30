@@ -34,9 +34,15 @@ class EmbeddingService:
             f"{EmbeddingService.MODEL_NAME}"
         )
 
-        model = SentenceTransformer(
-            EmbeddingService.MODEL_NAME
-        )
+        try:
+            model = SentenceTransformer(
+                EmbeddingService.MODEL_NAME,
+                local_files_only=True,
+            )
+        except Exception:
+            model = SentenceTransformer(
+                EmbeddingService.MODEL_NAME
+            )
 
         print(
             "Embedding model loaded successfully."
